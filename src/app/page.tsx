@@ -63,9 +63,9 @@ export default function HomePage() {
                 <h3 className="font-bold text-lg text-gray-800">{doc.title}</h3>
                 <p className="text-sm text-gray-500 mt-1">{doc.subtitle}</p>
               </div>
-              <a href="#" className="text-sm font-semibold text-primary-500 mt-4 self-start">
+              <button className="text-sm font-semibold text-primary-500 mt-4 self-start hover:text-primary-600 transition-colors">
                 만들기 <i className="fas fa-arrow-right ml-1"></i>
-              </a>
+              </button>
             </div>
           ))}
 

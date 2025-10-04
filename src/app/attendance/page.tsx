@@ -80,7 +80,7 @@ export default function AttendancePage() {
         {/* 헤더 */}
         <header className="mb-8">
           <nav className="text-sm text-gray-500 mb-4">
-            <a href="/" className="hover:text-primary-500">홈</a>
+            <Link href="/" className="hover:text-primary-500">홈</Link>
             <span className="mx-2">/</span>
             <span className="text-gray-900">출결 관리</span>
           </nav>

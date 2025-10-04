@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { Notice, SupportItem } from '@/types';
 // import { NOTICES, SUPPORT_ITEMS } from '@/constants';
 
 /**
