@@ -1,0 +1,53 @@
+{
+  "name": "beyond-blackboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI 기반 학교 교사 인권 + 학급 행정 자동화 도우미",
+  "author": "Beyond Blackboard Team",
+  "license": "MIT",
+  "homepage": "https://beyond-blackboard.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/beyond-blackboard.git"
+  },
+  "keywords": [
+    "교사",
+    "행정업무",
+    "AI",
+    "자동화",
+    "학교",
+    "교육",
+    "문서생성",
+    "수행평가"
+  ],
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf .next dist",
+    "analyze": "ANALYZE=true npm run build"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.7",
+    "@heroicons/react": "^2.2.0",
+    "lucide-react": "^0.539.0",
+    "next": "15.4.6",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.6",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5"
+  }
+}
