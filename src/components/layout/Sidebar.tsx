@@ -118,8 +118,7 @@ const Sidebar: React.FC = () => {
   return (
     <aside className="w-80 flex-shrink-0 bg-white border-l border-gray-200 p-6 overflow-y-auto hidden lg:block h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)]">
       <div className="widget-box rounded-xl mb-6">
-        <h3 className="font-semibold p-4 border-b border-gray-200 flex items-center">
-          <i className="fas fa-bullhorn text-primary-500 mr-3"></i>
+        <h3 className="font-semibold p-4 border-b border-gray-200">
           공지사항
         </h3>
         <ul className="p-4 space-y-3 text-sm text-gray-600">
@@ -128,8 +127,7 @@ const Sidebar: React.FC = () => {
         </ul>
       </div>
       <div className="widget-box rounded-xl">
-        <h3 className="font-semibold p-4 border-b border-gray-200 flex items-center">
-          <i className="fas fa-question-circle text-primary-500 mr-3"></i>
+        <h3 className="font-semibold p-4 border-b border-gray-200">
           도움말 및 지원
         </h3>
         <ul className="p-4 space-y-3 text-sm text-gray-600">

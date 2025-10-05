@@ -1,0 +1,44 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 귀여운 캐릭터를 SVG로 재현 -->
+  <!-- 하트 -->
+  <path d="M20 25C20 18 25 15 30 18C35 15 40 18 40 25C40 32 30 42 30 42S20 32 20 25Z" fill="#FF9500"/>
+  <path d="M15 35C15 28 20 25 25 28C30 25 35 28 35 35C35 42 25 52 25 52S15 42 15 35Z" fill="#FF9500"/>
+  
+  <!-- 캐릭터 몸체 -->
+  <circle cx="60" cy="45" r="25" fill="#E8D5C4"/>
+  
+  <!-- 얼굴 -->
+  <circle cx="60" cy="40" r="18" fill="#FFFFFF"/>
+  
+  <!-- 머리카락 -->
+  <path d="M42 35C42 25 50 20 60 20C70 20 78 25 78 35C78 28 70 35 60 35C50 35 42 28 42 35Z" fill="#B8A691"/>
+  
+  <!-- 상투 -->
+  <ellipse cx="60" cy="22" rx="3" ry="5" fill="#B8A691"/>
+  
+  <!-- 눈 -->
+  <circle cx="55" cy="38" r="1.5" fill="#333"/>
+  <circle cx="65" cy="38" r="1.5" fill="#333"/>
+  
+  <!-- 볼 -->
+  <circle cx="50" cy="43" r="3" fill="#FFB3BA" opacity="0.6"/>
+  <circle cx="70" cy="43" r="3" fill="#FFB3BA" opacity="0.6"/>
+  
+  <!-- 입 -->
+  <path d="M57 46C57 47 58 48 60 48C62 48 63 47 63 46" stroke="#333" stroke-width="1" fill="none"/>
+  
+  <!-- 옷 -->
+  <path d="M45 55L75 55L75 75C75 80 70 85 60 85C50 85 45 80 45 75Z" fill="#DDA0DD"/>
+  
+  <!-- 팔 -->
+  <ellipse cx="40" cy="60" rx="6" ry="12" fill="#FFFFFF"/>
+  <ellipse cx="80" cy="60" rx="6" ry="12" fill="#FFFFFF"/>
+  
+  <!-- 손 -->
+  <circle cx="40" cy="70" r="4" fill="#E8D5C4"/>
+  <circle cx="80" cy="70" r="4" fill="#E8D5C4"/>
+  
+  <!-- 종이/스크롤 -->
+  <rect x="35" y="72" width="50" height="6" rx="3" fill="#FF9500"/>
+  <rect x="35" y="78" width="50" height="6" rx="3" fill="#FFFFFF"/>
+</svg>

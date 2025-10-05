@@ -120,9 +120,10 @@ export const SUPPORT_ITEMS: SupportItem[] = [
 
 // 네비게이션 메뉴
 export const NAVIGATION_ITEMS = [
-  { title: '문서 생성', href: '/documents', isActive: true },
-  { title: '수행평가 채점', href: '/evaluation' },
-  { title: '출결 관리', href: '/attendance' },
+  { title: '학생관리', href: '/students' },
+  { title: '출결도우미', href: '/attendance' },
+  { title: '채점도우미', href: '/evaluation' },
+  { title: '생기부도우미', href: '/records' },
 ];
 
 // 색상 상수

@@ -50,8 +50,12 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
           <div className="flex items-center space-x-8">
             {/* 로고 */}
             <Link href="/" className="flex items-center hover:opacity-80 transition-opacity cursor-pointer">
-              <i className="fas fa-robot text-2xl text-primary-500 mr-2"></i>
-              <h1 className="text-lg font-bold">AI 행정 도우미</h1>
+              <img 
+                src="/images/pencil-logo.png" 
+                alt="로고" 
+                className="w-8 h-8 rounded-full mr-2 shadow-sm"
+              />
+              <h1 className="text-lg font-bold">크레파스 - AI도우미</h1>
             </Link>
             {/* 네비게이션 메뉴 */}
             <nav className="hidden md:flex items-center space-x-6">
@@ -81,7 +85,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
             <div className="flex items-center">
               <img
                 className="h-9 w-9 rounded-full object-cover"
-                src={currentUser.avatar}
+                src="/images/cute-character.svg"
                 alt="User avatar"
               />
               <div className="ml-2 hidden md:block">
