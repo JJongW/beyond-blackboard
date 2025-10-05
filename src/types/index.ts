@@ -82,6 +82,13 @@ export interface Student {
   name: string;
   studentNumber: string; // 학번
   class: string; // 반
+  grade: number; // 학년
+  tags: string[]; // 태그들
+  isFavorite: boolean; // 즐겨찾기 여부
+  phone?: string; // 전화번호
+  email?: string; // 이메일
+  notes?: string; // 특이사항
+  avatar?: string; // 프로필 이미지
 }
 
 export interface AttendanceRecord {
