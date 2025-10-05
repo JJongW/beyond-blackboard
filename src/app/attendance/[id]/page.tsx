@@ -55,6 +55,17 @@ export default function AttendanceDetailPage() {
     '9': 'present',
     '10': 'present',
   });
+  
+  // 알림 상태 관리
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error';
+  }>({
+    show: false,
+    message: '',
+    type: 'success'
+  });
 
   // 출결 상태 변경
   const updateAttendance = (studentId: string, status: AttendanceStatus) => {
@@ -62,6 +73,37 @@ export default function AttendanceDetailPage() {
       ...prev,
       [studentId]: status
     }));
+  };
+
+  // 출결 저장 함수
+  const saveAttendance = async () => {
+    try {
+      // 실제 API 호출 로직이 들어갈 곳
+      // await saveAttendanceAPI(params.id, attendanceRecords);
+      
+      // 임시로 저장 처리 시뮬레이션
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 성공 알림 표시
+      showNotification('출결이 성공적으로 저장되었습니다! ✅', 'success');
+    } catch (error) {
+      // 실패 알림 표시
+      showNotification('출결 저장 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+    }
+  };
+
+  // 알림 표시 함수
+  const showNotification = (message: string, type: 'success' | 'error') => {
+    setNotification({
+      show: true,
+      message,
+      type
+    });
+
+    // 3초 후 자동으로 알림 숨기기
+    setTimeout(() => {
+      setNotification(prev => ({ ...prev, show: false }));
+    }, 3000);
   };
 
   // 출결 통계 계산
@@ -210,11 +252,52 @@ export default function AttendanceDetailPage() {
 
         {/* 저장 버튼 */}
         <div className="mt-6 flex justify-end">
-          <button className="flex items-center space-x-2 bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors">
+          <button 
+            onClick={saveAttendance}
+            className="flex items-center space-x-2 bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors"
+          >
             <i className="fas fa-save"></i>
             <span>출결 저장</span>
           </button>
         </div>
+
+        {/* 토스트 알림 */}
+        {notification.show && (
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-slide-in-down">
+            <div className={`
+              max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 p-4
+              ${notification.type === 'success' 
+                ? 'border-green-500' 
+                : 'border-red-500'
+              }
+            `}>
+              <div className="flex items-center">
+                <div className={`
+                  flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center
+                  ${notification.type === 'success' 
+                    ? 'bg-green-100 text-green-600' 
+                    : 'bg-red-100 text-red-600'
+                  }
+                `}>
+                  <i className={`fas ${
+                    notification.type === 'success' ? 'fa-check' : 'fa-times'
+                  } text-sm`}></i>
+                </div>
+                <div className="ml-3 flex-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    {notification.message}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setNotification(prev => ({ ...prev, show: false }))}
+                  className="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <i className="fas fa-times text-sm"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </MainLayout>
   );
