@@ -47,6 +47,18 @@ export default function HomePage() {
     setIsAddingTodo(false);
   };
 
+  // 할 일 정렬 (완료되지 않은 것 먼저, 그 다음 우선순위 순)
+  const sortedTodos = [...todos].sort((a, b) => {
+    // 완료 상태로 먼저 정렬 (완료되지 않은 것이 위로)
+    if (a.completed !== b.completed) {
+      return a.completed ? 1 : -1;
+    }
+    
+    // 우선순위로 정렬 (높음 > 보통 > 낮음)
+    const priorityOrder = { high: 3, medium: 2, low: 1 };
+    return priorityOrder[b.priority as keyof typeof priorityOrder] - priorityOrder[a.priority as keyof typeof priorityOrder];
+  });
+
   // 교육 뉴스/소식 데이터
   const educationNews = [
     {
@@ -243,8 +255,10 @@ export default function HomePage() {
 
               {/* 할 일 목록 */}
               <div className="space-y-2">
-                {todos.map((todo) => (
-                  <div key={todo.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors group">
+                {sortedTodos.map((todo) => (
+                  <div key={todo.id} className={`flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-all group ${
+                    todo.completed ? 'opacity-75' : ''
+                  }`}>
                     {/* 커스텀 원형 체크박스 */}
                     <button
                       onClick={() => {
@@ -268,14 +282,17 @@ export default function HomePage() {
                       <span className={`text-sm ${todo.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
                         {todo.text}
                       </span>
-                      <div className="flex items-center mt-1">
+                      <div className="flex items-center justify-between mt-1">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                           todo.priority === 'high' ? 'bg-red-100 text-red-800' :
                           todo.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
                           'bg-green-100 text-green-800'
                         }`}>
-                          {todo.priority === 'high' ? '높음' : todo.priority === 'medium' ? '보통' : '낮음'}
+                          {todo.priority === 'high' ? '🔥 높음' : todo.priority === 'medium' ? '⚡ 보통' : '🌱 낮음'}
                         </span>
+                        {todo.completed && (
+                          <span className="text-xs text-gray-400">✅ 완료됨</span>
+                        )}
                       </div>
                     </div>
                     {/* 삭제 버튼 (호버 시 표시) */}
