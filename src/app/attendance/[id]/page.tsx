@@ -18,16 +18,16 @@ const mockClassPeriod: ClassPeriod = {
 };
 
 const mockStudents: Student[] = [
-  { id: '1', name: '김민준', studentNumber: '20240001', class: '3-1' },
-  { id: '2', name: '이서윤', studentNumber: '20240002', class: '3-1' },
-  { id: '3', name: '박지호', studentNumber: '20240003', class: '3-1' },
-  { id: '4', name: '최예은', studentNumber: '20240004', class: '3-1' },
-  { id: '5', name: '정도현', studentNumber: '20240005', class: '3-1' },
-  { id: '6', name: '한소영', studentNumber: '20240006', class: '3-1' },
-  { id: '7', name: '윤재민', studentNumber: '20240007', class: '3-1' },
-  { id: '8', name: '임채원', studentNumber: '20240008', class: '3-1' },
-  { id: '9', name: '오현우', studentNumber: '20240009', class: '3-1' },
-  { id: '10', name: '강다은', studentNumber: '20240010', class: '3-1' },
+  { id: '1', name: '김민준', studentNumber: '20240001', class: '3-1', grade: 3, tags: [], isFavorite: false },
+  { id: '2', name: '이서윤', studentNumber: '20240002', class: '3-1', grade: 3, tags: [], isFavorite: false },
+  { id: '3', name: '박지호', studentNumber: '20240003', class: '3-1', grade: 3, tags: [], isFavorite: false },
+  { id: '4', name: '최예은', studentNumber: '20240004', class: '3-1', grade: 3, tags: [], isFavorite: false },
+  { id: '5', name: '정도현', studentNumber: '20240005', class: '3-1', grade: 3, tags: [], isFavorite: false },
+  { id: '6', name: '한소영', studentNumber: '20240006', class: '3-1', grade: 3, tags: [], isFavorite: false },
+  { id: '7', name: '윤재민', studentNumber: '20240007', class: '3-1', grade: 3, tags: [], isFavorite: false },
+  { id: '8', name: '임채원', studentNumber: '20240008', class: '3-1', grade: 3, tags: [], isFavorite: false },
+  { id: '9', name: '오현우', studentNumber: '20240009', class: '3-1', grade: 3, tags: [], isFavorite: false },
+  { id: '10', name: '강다은', studentNumber: '20240010', class: '3-1', grade: 3, tags: [], isFavorite: false },
 ];
 
 // 출결 상태별 설정
