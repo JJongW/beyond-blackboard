@@ -1,16 +1,13 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import type { DsDoc, DsGroupKey } from "@/constants/dsCatalog";
 import { CREPASS_ICON_NAMES, DS_DOCS_BY_GROUP } from "@/constants/dsCatalog";
 import {
-  BRAND,
   COLOR,
   ELEVATION,
   MOTION,
   SPACE,
   TYPE,
-  studentAvatarSrc,
 } from "@/constants/designTokens";
 import CrepassIcon from "@/components/ui/CrepassIcon";
 import ActionButton from "@/components/ui/ActionButton";
