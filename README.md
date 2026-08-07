@@ -282,6 +282,12 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ template, className }) => {
 - [x] Top/Side Navigation 기존 셸을 Done으로 표시
 - [x] 홈 · 학생 · 채점 · 문서 연결
 
+### Phase 4
+
+- [x] 잔여 Planned 대부분 구현 (Slider·Attachment·Sheet·Panel·Time/Quantity·Footer 등)
+- [x] Bottom Navigation = Excluded (범위 밖)
+- [x] 출결·학생·채점 업로드·MainLayout Footer 연결
+
 ### 검증
 
 - [x] `npm run type-check` / `npm run build`

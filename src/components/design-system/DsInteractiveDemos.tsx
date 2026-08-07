@@ -21,6 +21,20 @@ import ReactionButton from "@/components/ui/ReactionButton";
 import TagGroup from "@/components/ui/TagGroup";
 import FloatingActionButton from "@/components/ui/FloatingActionButton";
 import Card from "@/components/ui/Card";
+import Slider from "@/components/ui/Slider";
+import AttachmentInput from "@/components/ui/AttachmentInput";
+import BottomSheet from "@/components/ui/BottomSheet";
+import SidePanel from "@/components/ui/SidePanel";
+import TimePicker from "@/components/ui/TimePicker";
+import QuantityPicker from "@/components/ui/QuantityPicker";
+import ContentPlaceholder from "@/components/ui/ContentPlaceholder";
+import Footer from "@/components/ui/Footer";
+import InputButton from "@/components/ui/InputButton";
+import ImageFrame from "@/components/ui/ImageFrame";
+import IdentityPlaceholder from "@/components/ui/IdentityPlaceholder";
+import ScrollFog from "@/components/ui/ScrollFog";
+import ContextualFloatingButton from "@/components/ui/ContextualFloatingButton";
+import MenuSheet from "@/components/ui/MenuSheet";
 
 /** DS Preview용 인터랙티브 데모 (클라이언트) */
 export function DsControlsDemo() {
@@ -286,6 +300,165 @@ export function DsCardDemo() {
         <p className="cp-h3">Raised</p>
         <p className="mt-2 text-sm text-ink-secondary">강조 표면</p>
       </Card>
+    </div>
+  );
+}
+
+export function DsSliderDemo() {
+  const [v, setV] = useState(40);
+  return <Slider label="점수" value={v} onChange={setV} className="max-w-sm" />;
+}
+
+export function DsAttachmentDemo() {
+  const [files, setFiles] = useState<File[]>([]);
+  return <AttachmentInput files={files} onChange={setFiles} />;
+}
+
+export function DsBottomSheetDemo() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <button
+        type="button"
+        className="cp-btn-secondary"
+        onClick={() => setOpen(true)}
+      >
+        시트 열기
+      </button>
+      <BottomSheet open={open} onClose={() => setOpen(false)} title="필터">
+        <p className="text-sm text-ink-secondary">
+          학년·반 필터를 여기에 둡니다.
+        </p>
+      </BottomSheet>
+    </div>
+  );
+}
+
+export function DsSidePanelDemo() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <button
+        type="button"
+        className="cp-btn-secondary"
+        onClick={() => setOpen(true)}
+      >
+        패널 열기
+      </button>
+      <SidePanel open={open} onClose={() => setOpen(false)} title="학생 상세">
+        <p className="text-sm text-ink-secondary">출결·메모 요약</p>
+      </SidePanel>
+    </div>
+  );
+}
+
+export function DsTimePickerDemo() {
+  const [t, setT] = useState("09:00");
+  return (
+    <TimePicker label="시작" value={t} onChange={setT} className="max-w-xs" />
+  );
+}
+
+export function DsQuantityDemo() {
+  const [n, setN] = useState(3);
+  return <QuantityPicker label="인원" value={n} onChange={setN} />;
+}
+
+export function DsPlaceholderDemo() {
+  return (
+    <ContentPlaceholder
+      title="영역 예약"
+      description="콘텐츠가 곧 채워집니다."
+    />
+  );
+}
+
+export function DsFooterDemo() {
+  return <Footer className="rounded-md border border-line" />;
+}
+
+export function DsInputButtonDemo() {
+  const [q, setQ] = useState("");
+  return (
+    <InputButton
+      className="max-w-md"
+      value={q}
+      onChange={setQ}
+      placeholder="검색어"
+      buttonLabel="검색"
+      onSubmit={() => undefined}
+    />
+  );
+}
+
+export function DsImageFrameDemo() {
+  return (
+    <ImageFrame
+      src="/images/crepass-avatar-student-boy.png"
+      alt="학생"
+      className="max-w-xs"
+    />
+  );
+}
+
+export function DsIdentityDemo() {
+  return (
+    <div className="flex gap-3">
+      <IdentityPlaceholder label="김민" size={40} />
+      <IdentityPlaceholder label="이" size={48} />
+    </div>
+  );
+}
+
+export function DsScrollFogDemo() {
+  return (
+    <ScrollFog
+      className="max-w-sm rounded-md border border-line"
+      maxHeightClass="max-h-40"
+    >
+      <ul className="divide-y divide-line">
+        {Array.from({ length: 8 }, (_, i) => (
+          <li key={i} className="px-3 py-2 text-sm text-ink">
+            항목 {i + 1}
+          </li>
+        ))}
+      </ul>
+    </ScrollFog>
+  );
+}
+
+export function DsContextualFabDemo() {
+  return <ContextualFloatingButton label="도움말" href="/design-system" />;
+}
+
+export function DsMenuSheetDemo() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <button
+        type="button"
+        className="cp-btn-secondary"
+        onClick={() => setOpen(true)}
+      >
+        메뉴 시트
+      </button>
+      <MenuSheet
+        open={open}
+        onClose={() => setOpen(false)}
+        items={[
+          {
+            id: "1",
+            label: "수정",
+            icon: <CrepassIcon name="crayon" size={16} />,
+          },
+          {
+            id: "2",
+            label: "삭제",
+            destructive: true,
+            icon: <CrepassIcon name="trash" size={16} />,
+          },
+        ]}
+      />
     </div>
   );
 }

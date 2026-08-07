@@ -37,6 +37,20 @@ import {
   DsTagGroupDemo,
   DsFabDemo,
   DsCardDemo,
+  DsSliderDemo,
+  DsAttachmentDemo,
+  DsBottomSheetDemo,
+  DsSidePanelDemo,
+  DsTimePickerDemo,
+  DsQuantityDemo,
+  DsPlaceholderDemo,
+  DsFooterDemo,
+  DsInputButtonDemo,
+  DsImageFrameDemo,
+  DsIdentityDemo,
+  DsScrollFogDemo,
+  DsContextualFabDemo,
+  DsMenuSheetDemo,
 } from "@/components/design-system/DsInteractiveDemos";
 import {
   DsDoDont,
@@ -78,6 +92,12 @@ export function DsDocRenderer({
           <p className="max-w-2xl text-base text-ink-secondary">
             Planned — 런타임 컴포넌트 미구현입니다. 가짜 Preview는 제공하지
             않습니다.
+          </p>
+        </DsSection>
+      ) : status === "Excluded" ? (
+        <DsSection id="status" title="Status">
+          <p className="max-w-2xl text-base text-ink-secondary">
+            Excluded — 크레파스 범위 밖입니다 (모바일 Bottom Navigation 등).
           </p>
         </DsSection>
       ) : null}
@@ -294,6 +314,34 @@ function renderDemo(demo: NonNullable<DsDoc["demo"]>) {
       return <DsTagGroupDemo />;
     case "fab":
       return <DsFabDemo />;
+    case "slider":
+      return <DsSliderDemo />;
+    case "attachment":
+      return <DsAttachmentDemo />;
+    case "bottom-sheet":
+      return <DsBottomSheetDemo />;
+    case "side-panel":
+      return <DsSidePanelDemo />;
+    case "time-picker":
+      return <DsTimePickerDemo />;
+    case "quantity":
+      return <DsQuantityDemo />;
+    case "placeholder":
+      return <DsPlaceholderDemo />;
+    case "footer":
+      return <DsFooterDemo />;
+    case "input-button":
+      return <DsInputButtonDemo />;
+    case "image-frame":
+      return <DsImageFrameDemo />;
+    case "identity":
+      return <DsIdentityDemo />;
+    case "scroll-fog":
+      return <DsScrollFogDemo />;
+    case "contextual-fab":
+      return <DsContextualFabDemo />;
+    case "menu-sheet":
+      return <DsMenuSheetDemo />;
     case "badge":
       return (
         <div className="flex flex-wrap items-center gap-3">

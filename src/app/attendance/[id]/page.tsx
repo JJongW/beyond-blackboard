@@ -11,6 +11,11 @@ import Badge from "@/components/ui/Badge";
 import Avatar from "@/components/ui/Avatar";
 import Select from "@/components/ui/Select";
 import ProgressCircle from "@/components/ui/ProgressCircle";
+import TimePicker from "@/components/ui/TimePicker";
+import QuantityPicker from "@/components/ui/QuantityPicker";
+import SidePanel from "@/components/ui/SidePanel";
+import ScrollFog from "@/components/ui/ScrollFog";
+import IdentityPlaceholder from "@/components/ui/IdentityPlaceholder";
 import { ClassPeriod, Student, AttendanceStatus } from "@/types";
 import { studentAvatarSrc } from "@/constants/designTokens";
 
@@ -189,6 +194,10 @@ export default function AttendanceDetailPage() {
   const periodId = typeof params.id === "string" ? params.id : "1";
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [startTime, setStartTime] = useState(mockClassPeriod.startTime);
+  const [endTime, setEndTime] = useState(mockClassPeriod.endTime);
+  const [bonusSeat, setBonusSeat] = useState(0);
+  const [panelStudent, setPanelStudent] = useState<Student | null>(null);
   const [attendanceRecords, setAttendanceRecords] = useState<
     Record<string, AttendanceStatus>
   >({
@@ -277,8 +286,22 @@ export default function AttendanceDetailPage() {
           }
         />
 
-        <div className="cp-card mb-6">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
+        <div className="cp-card mb-6 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <TimePicker
+              label="시작"
+              value={startTime}
+              onChange={setStartTime}
+            />
+            <TimePicker label="종료" value={endTime} onChange={setEndTime} />
+            <QuantityPicker
+              label="추가 좌석(미리보기)"
+              value={bonusSeat}
+              onChange={setBonusSeat}
+              max={10}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4 border-t border-line pt-4 md:grid-cols-4 lg:grid-cols-7">
             <div className="text-center">
               <p className="text-2xl font-semibold text-brand">
                 {attendanceRate}%
@@ -307,61 +330,71 @@ export default function AttendanceDetailPage() {
           <div className="border-b border-line px-5 py-4">
             <h2 className="cp-h3">학생 출결</h2>
             <p className="mt-1 text-sm text-ink-muted">
-              상태를 눌러 변경한 뒤 저장하세요.
+              이름을 누르면 상세 패널이 열립니다. 상태는 Select로 변경하세요.
             </p>
           </div>
-          <ul className="divide-y divide-line">
-            {mockStudents.map((student, index) => {
-              return (
-                <li
-                  key={student.id}
-                  className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between hover:bg-surface-elevated/60"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <Avatar
-                      src={student.avatar}
-                      gender={student.gender}
-                      alt=""
-                      size={40}
-                    />
-                    <div className="min-w-0">
-                      <p className="font-medium text-ink">
-                        <span className="mr-2 text-ink-subtle">
-                          {index + 1}
-                        </span>
-                        {student.name}
-                      </p>
-                      <p className="text-sm text-ink-muted">
-                        {student.studentNumber} · {student.class}
-                      </p>
+          <ScrollFog maxHeightClass="max-h-[28rem]">
+            <ul className="divide-y divide-line">
+              {mockStudents.map((student, index) => {
+                return (
+                  <li
+                    key={student.id}
+                    className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between hover:bg-surface-elevated/60"
+                  >
+                    <button
+                      type="button"
+                      className="flex min-w-0 items-center gap-3 text-left"
+                      onClick={() => setPanelStudent(student)}
+                    >
+                      {student.avatar ? (
+                        <Avatar
+                          src={student.avatar}
+                          gender={student.gender}
+                          alt=""
+                          size={40}
+                        />
+                      ) : (
+                        <IdentityPlaceholder label={student.name} size={40} />
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-medium text-ink">
+                          <span className="mr-2 text-ink-subtle">
+                            {index + 1}
+                          </span>
+                          {student.name}
+                        </p>
+                        <p className="text-sm text-ink-muted">
+                          {student.studentNumber} · {student.class}
+                        </p>
+                      </div>
+                      <Badge tone="neutral" className="hidden sm:inline-flex">
+                        {
+                          attendanceConfig[
+                            attendanceRecords[student.id] ?? "present"
+                          ].label
+                        }
+                      </Badge>
+                    </button>
+                    <div className="w-full sm:w-44">
+                      <Select
+                        aria-label={`${student.name} 출결`}
+                        value={attendanceRecords[student.id] ?? "present"}
+                        onChange={(v) =>
+                          updateAttendance(student.id, v as AttendanceStatus)
+                        }
+                        options={(
+                          Object.keys(attendanceConfig) as AttendanceStatus[]
+                        ).map((status) => ({
+                          value: status,
+                          label: attendanceConfig[status].label,
+                        }))}
+                      />
                     </div>
-                    <Badge tone="neutral" className="hidden sm:inline-flex">
-                      {
-                        attendanceConfig[
-                          attendanceRecords[student.id] ?? "present"
-                        ].label
-                      }
-                    </Badge>
-                  </div>
-                  <div className="w-full sm:w-44">
-                    <Select
-                      aria-label={`${student.name} 출결`}
-                      value={attendanceRecords[student.id] ?? "present"}
-                      onChange={(v) =>
-                        updateAttendance(student.id, v as AttendanceStatus)
-                      }
-                      options={(
-                        Object.keys(attendanceConfig) as AttendanceStatus[]
-                      ).map((status) => ({
-                        value: status,
-                        label: attendanceConfig[status].label,
-                      }))}
-                    />
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                  </li>
+                );
+              })}
+            </ul>
+          </ScrollFog>
         </section>
 
         <div className="mt-6 flex items-center justify-end gap-3">
@@ -379,6 +412,43 @@ export default function AttendanceDetailPage() {
             출결 저장
           </ActionButton>
         </div>
+
+        <SidePanel
+          open={!!panelStudent}
+          onClose={() => setPanelStudent(null)}
+          title={panelStudent?.name ?? "학생"}
+        >
+          {panelStudent && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Avatar
+                  src={panelStudent.avatar}
+                  gender={panelStudent.gender}
+                  alt=""
+                  size={56}
+                />
+                <div>
+                  <p className="font-medium text-ink">{panelStudent.name}</p>
+                  <p className="text-sm text-ink-muted">
+                    {panelStudent.class} · {panelStudent.studentNumber}
+                  </p>
+                </div>
+              </div>
+              <p className="text-sm text-ink-secondary">
+                현재 상태:{" "}
+                {
+                  attendanceConfig[
+                    attendanceRecords[panelStudent.id] ?? "present"
+                  ].label
+                }
+              </p>
+              <p className="text-sm text-ink-muted">
+                교시 {startTime}–{endTime}
+                {bonusSeat > 0 ? ` · 추가 좌석 ${bonusSeat}` : ""}
+              </p>
+            </div>
+          )}
+        </SidePanel>
 
         <Snackbar
           open={snack.open}
