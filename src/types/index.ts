@@ -4,7 +4,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'teacher' | 'admin';
+  role: "teacher" | "admin";
   school: string;
   avatar?: string;
 }
@@ -19,13 +19,13 @@ export interface DocumentTemplate {
   isComingSoon?: boolean;
 }
 
-export type DocumentCategory = 
-  | 'communication' // 생활지도
-  | 'activity' // 창의적 체험활동
-  | 'evaluation' // 수행평가
-  | 'life' // 행동 및 특성화 의견
-  | 'meeting' // 회의록
-  | 'other'; // 기타
+export type DocumentCategory =
+  | "communication" // 생활지도
+  | "activity" // 창의적 체험활동
+  | "evaluation" // 수행평가
+  | "life" // 행동 및 특성화 의견
+  | "meeting" // 회의록
+  | "other"; // 기타
 
 export interface Notice {
   id: string;
@@ -85,6 +85,8 @@ export interface Student {
   grade: number; // 학년
   tags: string[]; // 태그들
   isFavorite: boolean; // 즐겨찾기 여부
+  /** 아바타 선택용 — male → boy pastel, female → girl pastel */
+  gender?: "male" | "female";
   phone?: string; // 전화번호
   email?: string; // 이메일
   notes?: string; // 특이사항
@@ -100,10 +102,10 @@ export interface AttendanceRecord {
   recordedAt: string; // 기록 시간
 }
 
-export type AttendanceStatus = 
-  | 'present' // 출석
-  | 'absent' // 결석
-  | 'late' // 지각
-  | 'early_leave' // 조퇴
-  | 'sick_leave' // 병결
-  | 'official_leave'; // 공결
+export type AttendanceStatus =
+  | "present" // 출석
+  | "absent" // 결석
+  | "late" // 지각
+  | "early_leave" // 조퇴
+  | "sick_leave" // 병결
+  | "official_leave"; // 공결

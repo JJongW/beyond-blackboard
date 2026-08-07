@@ -234,4 +234,50 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ template, className }) => {
 
 ---
 
+## Seed × 크레파스 — Phase 1 체크리스트
+
+그릴링 합의(2026-08-07). **구현 전** 기준. 확인·수정 없으면 다음 작업에서 P0부터 착수.
+
+### 공유 이해
+
+| 결정 | 내용 |
+|------|------|
+| 목표 | Seed 문서 + 런타임 (브랜드·파스텔 **hex만** 크레파스) |
+| 깊이 | React + size/variant/state (`@seed-design/react` 미사용) |
+| 적용 | 컴포넌트 추가 시 관련 **제품 화면 즉시** 교체 |
+| 문서 | 미구현 = `Planned` (가짜 Preview 없음) |
+| 제외 | Deprecated 숨김, Manner Temp→Chip/Tag, Bottom Nav·다크 논외 |
+| 토큰 | `--cp-*` 유지 + Seed 이름 **alias** |
+
+### Done 조건 (항목마다)
+
+1. React(또는 합의 primitive) API  
+2. `/design-system` Status=`Done` + 실컴포넌트 Preview만  
+3. 제품 화면 ≥1곳 사용  
+
+### P0
+
+- [ ] Foundations: Seed 스케일/네이밍 alias (색 hex만 크레파스)
+- [ ] Iconography 문서·주석 PNG 폐기 정리 (런타임은 SVG Line/Fill)
+- [ ] `ActionButton`, `TextField`+`Field`, `Dialog`/`AlertDialog`, `Snackbar`, `Skeleton`
+- [ ] `attendance/[id]/page.tsx` gray/`bg-white` 제거
+- [ ] `Sidebar.tsx` gray 제거·토큰화
+
+### P0.5 (Phase 1에 포함)
+
+- [ ] Chip / Badge / Callout / EmptyState API Seed화
+- [ ] `SegmentedControl`, `List`, `Avatar`
+- [ ] `students` 세그먼트·모달 교체, `records` 필터 통일, Header 알림 패널 정리
+
+### Phase 1 밖 (다음)
+
+Checkbox·Radio·Switch·Select·Tabs·Menu, ProgressCircle+Loading 실연결, 카탈로그 Status 일괄 정리
+
+### 검증
+
+- [ ] `npm run type-check` / `npm run build`
+- [ ] `/`, `/students`, `/attendance`, `/attendance/[id]`, `/design-system` — gray·스티커·가짜 Preview 없음
+
+---
+
 **Beyond Blackboard** - 교육의 미래를 만들어가는 AI 기반 행정 자동화 솔루션
