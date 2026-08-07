@@ -257,11 +257,11 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ template, className }) => {
 
 ### P0
 
-- [ ] Foundations: Seed 스케일/네이밍 alias (색 hex만 크레파스)
-- [ ] Iconography 문서·주석 PNG 폐기 정리 (런타임은 SVG Line/Fill)
-- [ ] `ActionButton`, `TextField`+`Field`, `Dialog`/`AlertDialog`, `Snackbar`, `Skeleton`
-- [ ] `attendance/[id]/page.tsx` gray/`bg-white` 제거
-- [ ] `Sidebar.tsx` gray 제거·토큰화
+- [x] Foundations: Seed 스케일/네이밍 alias (색 hex만 크레파스)
+- [x] Iconography 문서·주석 PNG 폐기 정리 (런타임은 SVG Line/Fill)
+- [x] `ActionButton`, `TextField`+`Field`, `Dialog`/`AlertDialog`, `Snackbar`, `Skeleton`
+- [x] `attendance/[id]/page.tsx` gray/`bg-white` 제거
+- [x] `Sidebar.tsx` gray 제거·토큰화
 
 ### P0.5 (Phase 1에 포함)
 
@@ -275,7 +275,7 @@ Checkbox·Radio·Switch·Select·Tabs·Menu, ProgressCircle+Loading 실연결, �
 
 ### 검증
 
-- [ ] `npm run type-check` / `npm run build`
+- [x] `npm run type-check` / `npm run build`
 - [ ] `/`, `/students`, `/attendance`, `/attendance/[id]`, `/design-system` — gray·스티커·가짜 Preview 없음
 
 ---
