@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local agent skills (not shipped)
+.agents/
+skills-lock.json
+
+# legacy sticker icon rasters (UI icons are SVG)
+public/images/icons/
