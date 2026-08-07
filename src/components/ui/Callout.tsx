@@ -9,6 +9,8 @@ type CalloutProps = {
   children: React.ReactNode;
   tone?: CalloutTone;
   icon?: CrepassIconName;
+  /** 아이콘 숨김 */
+  hideIcon?: boolean;
   className?: string;
 };
 
@@ -34,11 +36,15 @@ const TONE: Record<CalloutTone, { wrap: string; icon: string }> = {
 /**
  * Seed Callout — 팁·주의 인라인 메시지 (크레파스 파스텔 톤)
  */
+/**
+ * Seed Callout — 팁·주의 인라인 (tone / icon / hideIcon)
+ */
 export default function Callout({
   title,
   children,
   tone = "informative",
   icon = "help",
+  hideIcon = false,
   className = "",
 }: CalloutProps) {
   const t = TONE[tone];
@@ -47,9 +53,11 @@ export default function Callout({
       className={`flex gap-3 rounded-md border px-4 py-3 ${t.wrap} ${className}`}
       role="note"
     >
-      <span className={`mt-0.5 shrink-0 ${t.icon}`}>
-        <CrepassIcon name={icon} size={20} />
-      </span>
+      {!hideIcon && (
+        <span className={`mt-0.5 shrink-0 ${t.icon}`}>
+          <CrepassIcon name={icon} size={20} />
+        </span>
+      )}
       <div className="min-w-0 text-sm leading-relaxed">
         {title && <p className="mb-0.5 font-medium text-ink">{title}</p>}
         <div>{children}</div>

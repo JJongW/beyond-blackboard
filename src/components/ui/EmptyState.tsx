@@ -1,20 +1,20 @@
 import React from "react";
-import Link from "next/link";
 import CrepassIcon from "@/components/ui/CrepassIcon";
+import ActionButton from "@/components/ui/ActionButton";
 import type { CrepassIconName } from "@/constants/designSystemNav";
 
-interface EmptyStateProps {
+type EmptyStateProps = {
   title: string;
   description?: string;
   actionLabel?: string;
   actionHref?: string;
   onAction?: () => void;
-  /** 선택적 파스텔 아이콘 */
   icon?: CrepassIconName;
-}
+  className?: string;
+};
 
 /**
- * 빈 목록 / 준비 중 — CrepassIcon 선택 지원
+ * Seed Result / Empty — 빈 목록·결과 없음 (illustration + title + description + CTA)
  */
 export default function EmptyState({
   title,
@@ -23,31 +23,32 @@ export default function EmptyState({
   actionHref,
   onAction,
   icon = "help",
+  className = "",
 }: EmptyStateProps) {
   return (
-    <div className="cp-card flex flex-col items-center justify-center py-16 px-6 text-center">
-      <div className="mb-4">
+    <div
+      className={`cp-card flex flex-col items-center justify-center py-16 px-6 text-center ${className}`}
+    >
+      <div className="mb-4 text-ink-muted">
         <CrepassIcon name={icon} size={56} />
       </div>
       <p className="cp-h3">{title}</p>
       {description && (
         <p className="mt-2 max-w-sm text-sm text-ink-muted">{description}</p>
       )}
-      {actionLabel &&
-        (actionHref || onAction) &&
-        (actionHref ? (
-          <Link href={actionHref} className="cp-btn-primary mt-6">
-            {actionLabel}
-          </Link>
-        ) : (
-          <button
-            type="button"
-            onClick={onAction}
-            className="cp-btn-primary mt-6"
-          >
-            {actionLabel}
-          </button>
-        ))}
+      {actionLabel && (actionHref || onAction) && (
+        <div className="mt-6">
+          {actionHref ? (
+            <ActionButton variant="brandSolid" href={actionHref}>
+              {actionLabel}
+            </ActionButton>
+          ) : (
+            <ActionButton variant="brandSolid" onClick={onAction}>
+              {actionLabel}
+            </ActionButton>
+          )}
+        </div>
+      )}
     </div>
   );
 }

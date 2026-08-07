@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import CrepassIcon from "@/components/ui/CrepassIcon";
 
 export type ActionButtonSize = "xsmall" | "small" | "medium" | "large";
@@ -23,6 +24,8 @@ type ActionButtonProps = {
   disabled?: boolean;
   type?: "button" | "submit" | "reset";
   onClick?: () => void;
+  /** 있으면 Next Link로 렌더 */
+  href?: string;
   className?: string;
   "aria-label"?: string;
   prefixIcon?: React.ReactNode;
@@ -63,12 +66,38 @@ export default function ActionButton({
   disabled = false,
   type = "button",
   onClick,
+  href,
   className = "",
   "aria-label": ariaLabel,
   prefixIcon,
   suffixIcon,
 }: ActionButtonProps) {
   const isDisabled = disabled || loading;
+  const classes = `inline-flex items-center justify-center rounded-md font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${SIZE[size]} ${VARIANT[variant]} ${width === "fill" ? "w-full" : ""} ${className}`;
+
+  const content = loading ? (
+    <span className="inline-flex items-center gap-2">
+      <span
+        className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+        aria-hidden
+      />
+      {children ?? "처리 중"}
+    </span>
+  ) : (
+    <>
+      {prefixIcon}
+      {children}
+      {suffixIcon}
+    </>
+  );
+
+  if (href && !isDisabled) {
+    return (
+      <Link href={href} aria-label={ariaLabel} className={classes}>
+        {content}
+      </Link>
+    );
+  }
 
   return (
     <button
@@ -77,23 +106,9 @@ export default function ActionButton({
       disabled={isDisabled}
       aria-label={ariaLabel}
       aria-busy={loading || undefined}
-      className={`inline-flex items-center justify-center rounded-md font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${SIZE[size]} ${VARIANT[variant]} ${width === "fill" ? "w-full" : ""} ${className}`}
+      className={classes}
     >
-      {loading ? (
-        <span className="inline-flex items-center gap-2">
-          <span
-            className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-            aria-hidden
-          />
-          {children ?? "처리 중"}
-        </span>
-      ) : (
-        <>
-          {prefixIcon}
-          {children}
-          {suffixIcon}
-        </>
-      )}
+      {content}
     </button>
   );
 }
