@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import type { DsDoc, DsGroupKey } from "@/constants/dsCatalog";
 import { CREPASS_ICON_NAMES, DS_DOCS_BY_GROUP } from "@/constants/dsCatalog";
+import { resolveDsStatus } from "@/constants/dsStatus";
 import {
   COLOR,
   ELEVATION,
@@ -17,12 +18,25 @@ import { SkeletonListRows } from "@/components/ui/Skeleton";
 import Chip from "@/components/ui/Chip";
 import Avatar from "@/components/ui/Avatar";
 import {
+  DsCheckboxDemo,
+  DsControlsDemo,
+  DsListDemo,
+  DsLoadingDemo,
+  DsMenuDemo,
+  DsProgressDemo,
+  DsRadioDemo,
+  DsSegmentedDemo,
+  DsSelectDemo,
+  DsSwitchDemo,
+  DsTabsDemo,
+} from "@/components/design-system/DsInteractiveDemos";
+import {
   DsDoDont,
   DsPageHeader,
   DsSection,
 } from "@/components/design-system/DsPage";
 
-/** Seed식 문서 렌더러 — Anatomy / Properties / Guidelines + 라이브 데모 */
+/** Seed식 문서 렌더러 — Status · Anatomy + Done만 실 Preview */
 export function DsDocRenderer({
   group,
   doc,
@@ -30,6 +44,7 @@ export function DsDocRenderer({
   group: DsGroupKey;
   doc: DsDoc;
 }) {
+  const status = resolveDsStatus(group, doc.slug);
   const eyebrow =
     group === "foundations"
       ? "Foundations"
@@ -43,13 +58,21 @@ export function DsDocRenderer({
         eyebrow={eyebrow}
         title={doc.title}
         description={doc.description}
+        status={status}
       />
 
-      {doc.demo && (
+      {status === "Done" && doc.demo ? (
         <DsSection id="preview" title="Preview">
           <div className="ds-preview">{renderDemo(doc.demo)}</div>
         </DsSection>
-      )}
+      ) : status === "Planned" ? (
+        <DsSection id="status" title="Status">
+          <p className="max-w-2xl text-base text-ink-secondary">
+            Planned — 런타임 컴포넌트 미구현입니다. 가짜 Preview는 제공하지
+            않습니다.
+          </p>
+        </DsSection>
+      ) : null}
 
       {doc.sections.map((section) => (
         <DsSection key={section.id} id={section.id} title={section.title}>
@@ -227,6 +250,28 @@ function renderDemo(demo: NonNullable<DsDoc["demo"]>) {
           <SkeletonListRows count={3} />
         </div>
       );
+    case "controls":
+      return <DsControlsDemo />;
+    case "checkbox":
+      return <DsCheckboxDemo />;
+    case "radio":
+      return <DsRadioDemo />;
+    case "switch":
+      return <DsSwitchDemo />;
+    case "select":
+      return <DsSelectDemo />;
+    case "tabs":
+      return <DsTabsDemo />;
+    case "menu":
+      return <DsMenuDemo />;
+    case "progress":
+      return <DsProgressDemo />;
+    case "segmented":
+      return <DsSegmentedDemo />;
+    case "list":
+      return <DsListDemo />;
+    case "loading":
+      return <DsLoadingDemo />;
     case "badge":
       return (
         <div className="flex flex-wrap items-center gap-3">
@@ -242,36 +287,6 @@ function renderDemo(demo: NonNullable<DsDoc["demo"]>) {
               3
             </span>
           </span>
-        </div>
-      );
-    case "controls":
-      return (
-        <div className="flex flex-wrap items-center gap-6 text-sm text-ink">
-          <label className="inline-flex items-center gap-2">
-            <input
-              type="checkbox"
-              defaultChecked
-              className="h-4 w-4 accent-[var(--cp-brand)]"
-            />
-            전체 선택
-          </label>
-          <label className="inline-flex items-center gap-2">
-            <input
-              type="radio"
-              name="ds-demo-radio"
-              defaultChecked
-              className="h-4 w-4 accent-[var(--cp-brand)]"
-            />
-            출석
-          </label>
-          <label className="inline-flex items-center gap-2">
-            <input
-              type="radio"
-              name="ds-demo-radio"
-              className="h-4 w-4 accent-[var(--cp-brand)]"
-            />
-            결석
-          </label>
         </div>
       );
     case "icons":

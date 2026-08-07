@@ -8,10 +8,11 @@ import { NAVIGATION_ITEMS, NOTICES } from "@/constants";
 import { BRAND } from "@/constants/designTokens";
 import { NAV_ICON_BY_HREF } from "@/constants/designSystemNav";
 import { User } from "@/types";
-import CrepassIcon from "@/components/ui/CrepassIcon";
 import Badge, { NotificationBadge } from "@/components/ui/Badge";
 import Avatar from "@/components/ui/Avatar";
 import List, { ListItem } from "@/components/ui/List";
+import Menu from "@/components/ui/Menu";
+import CrepassIcon from "@/components/ui/CrepassIcon";
 import MobileMenu from "./MobileMenu";
 
 interface HeaderProps {
@@ -25,9 +26,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const [isUserOpen, setIsUserOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
-  const userRef = useRef<HTMLDivElement>(null);
 
   const defaultUser: User = {
     id: "1",
@@ -44,9 +43,6 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
       const target = e.target as Node;
       if (notifRef.current && !notifRef.current.contains(target)) {
         setIsNotifOpen(false);
-      }
-      if (userRef.current && !userRef.current.contains(target)) {
-        setIsUserOpen(false);
       }
     };
     document.addEventListener("mousedown", onPointerDown);
@@ -116,7 +112,6 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
               aria-expanded={isNotifOpen}
               onClick={() => {
                 setIsNotifOpen((v) => !v);
-                setIsUserOpen(false);
               }}
             >
               <CrepassIcon name="bell" size={22} />
@@ -166,53 +161,29 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
             )}
           </div>
 
-          <div className="relative hidden sm:block" ref={userRef}>
-            <button
-              type="button"
-              className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-surface-elevated transition-colors"
-              aria-expanded={isUserOpen}
-              aria-haspopup="menu"
-              onClick={() => {
-                setIsUserOpen((v) => !v);
-                setIsNotifOpen(false);
-              }}
-            >
-              <Avatar brand alt="" size={32} />
-              <span className="text-base font-medium text-ink hidden md:inline">
-                {currentUser.name}
-              </span>
-            </button>
-
-            {isUserOpen && (
-              <div
-                className="absolute right-0 mt-2 w-56 rounded-md border border-line bg-surface-card shadow-float z-50 py-1"
-                role="menu"
-              >
-                <div className="border-b border-line px-4 py-3">
-                  <p className="text-sm font-medium text-ink">
-                    {currentUser.name} 선생님
-                  </p>
-                  <p className="cp-caption mt-0.5">{currentUser.school}</p>
-                </div>
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-ink-secondary hover:bg-surface-elevated"
-                  onClick={() => setIsUserOpen(false)}
-                >
-                  <CrepassIcon name="settings" size={18} />
-                  설정 (준비 중)
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="w-full px-4 py-2.5 text-left text-sm text-ink-secondary hover:bg-surface-elevated"
-                  onClick={() => setIsUserOpen(false)}
-                >
-                  로그아웃 (준비 중)
-                </button>
-              </div>
-            )}
+          <div className="relative hidden sm:block">
+            <Menu
+              aria-label="사용자 메뉴"
+              trigger={
+                <span className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-surface-elevated transition-colors">
+                  <Avatar brand alt="" size={32} />
+                  <span className="text-base font-medium text-ink hidden md:inline">
+                    {currentUser.name}
+                  </span>
+                </span>
+              }
+              items={[
+                {
+                  id: "settings",
+                  label: "설정 (준비 중)",
+                  icon: <CrepassIcon name="settings" size={18} />,
+                },
+                {
+                  id: "logout",
+                  label: "로그아웃 (준비 중)",
+                },
+              ]}
+            />
           </div>
 
           <button
