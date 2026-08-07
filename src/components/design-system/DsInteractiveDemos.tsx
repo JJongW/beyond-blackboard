@@ -13,6 +13,14 @@ import List, { ListItem } from "@/components/ui/List";
 import Avatar from "@/components/ui/Avatar";
 import { SkeletonListRows } from "@/components/ui/Skeleton";
 import CrepassIcon from "@/components/ui/CrepassIcon";
+import Accordion from "@/components/ui/Accordion";
+import Divider from "@/components/ui/Divider";
+import PageBanner from "@/components/ui/PageBanner";
+import HelpBubble from "@/components/ui/HelpBubble";
+import ReactionButton from "@/components/ui/ReactionButton";
+import TagGroup from "@/components/ui/TagGroup";
+import FloatingActionButton from "@/components/ui/FloatingActionButton";
+import Card from "@/components/ui/Card";
 
 /** DS Preview용 인터랙티브 데모 (클라이언트) */
 export function DsControlsDemo() {
@@ -183,6 +191,101 @@ export function DsLoadingDemo() {
         <span className="text-sm text-ink-secondary">짧은 대기 — Progress</span>
       </div>
       <SkeletonListRows count={2} />
+    </div>
+  );
+}
+
+export function DsAccordionDemo() {
+  return (
+    <Accordion
+      exclusive
+      className="max-w-md"
+      items={[
+        {
+          id: "1",
+          title: "출결은 어떻게 저장하나요?",
+          defaultOpen: true,
+          content: "학생별 상태를 고른 뒤 출결 저장을 누릅니다.",
+        },
+        {
+          id: "2",
+          title: "즐겨찾기는 어디에 쓰이나요?",
+          content: "자주 보는 학생을 별표로 표시합니다.",
+        },
+      ]}
+    />
+  );
+}
+
+export function DsDividerDemo() {
+  return (
+    <div className="max-w-md space-y-4">
+      <Divider />
+      <Divider label="또는" />
+    </div>
+  );
+}
+
+export function DsPageBannerDemo() {
+  const [show, setShow] = useState(true);
+  if (!show) {
+    return (
+      <button
+        type="button"
+        className="text-sm text-brand"
+        onClick={() => setShow(true)}
+      >
+        배너 다시 보기
+      </button>
+    );
+  }
+  return (
+    <PageBanner
+      title="마감 안내"
+      description="수행평가 채점 마감이 다가옵니다."
+      onDismiss={() => setShow(false)}
+    />
+  );
+}
+
+export function DsHelpBubbleDemo() {
+  return (
+    <HelpBubble content="도움말은 짧은 한 문장으로 적습니다." label="도움말" />
+  );
+}
+
+export function DsReactionDemo() {
+  const [on, setOn] = useState(true);
+  return <ReactionButton pressed={on} onChange={setOn} />;
+}
+
+export function DsTagGroupDemo() {
+  return <TagGroup tags={["성실", "수학우수", "리더십", "예술"]} max={3} />;
+}
+
+export function DsFabDemo() {
+  return (
+    <div className="relative h-24 overflow-hidden rounded-md border border-dashed border-line bg-surface">
+      <FloatingActionButton
+        label="추가"
+        className="!absolute !bottom-3 !right-3 !h-11 !px-4 !text-sm"
+        onClick={() => undefined}
+      />
+    </div>
+  );
+}
+
+export function DsCardDemo() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 max-w-lg">
+      <Card>
+        <p className="cp-h3">기본 카드</p>
+        <p className="mt-2 text-sm text-ink-secondary">표면 컨테이너</p>
+      </Card>
+      <Card raised>
+        <p className="cp-h3">Raised</p>
+        <p className="mt-2 text-sm text-ink-secondary">강조 표면</p>
+      </Card>
     </div>
   );
 }
