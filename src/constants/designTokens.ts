@@ -8,10 +8,7 @@
 
 export const BRAND = {
   name: "크레파스",
-  // Flat pastel sticker mark — small-size readable crayon glyph
   mark: "/images/crepass-app-icon.png",
-  iconSheet: "/images/crepass-ui-icons.png",
-  // Flat pastel sticker teacher avatar (Header user chip)
   avatar: "/images/crepass-avatar.png",
   accentBudget: "10%",
 } as const;
@@ -20,12 +17,6 @@ export const BRAND = {
 export const STUDENT_AVATARS = {
   male: "/images/crepass-avatar-student-boy.png",
   female: "/images/crepass-avatar-student-girl.png",
-} as const;
-
-/** 즐겨찾기 별 — CrepassIcon `star` / `star-outline` 과 동일 경로 */
-export const STAR_ICONS = {
-  filled: "/images/icons/icon-star.png",
-  outline: "/images/icons/icon-star-outline.png",
 } as const;
 
 /** gender 기준 학생 아바타 경로 (미지정 시 boy) */

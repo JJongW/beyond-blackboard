@@ -57,6 +57,25 @@
   --cp-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --cp-ease: var(--cp-ease-out);
 
+  /* Seed naming aliases (values = Crepass Soft UI) */
+  --seed-font-size-t4: 0.875rem;
+  --seed-font-size-t5: 1rem;
+  --seed-font-size-t7: 1.25rem;
+  --seed-font-size-t10: 1.625rem;
+  --seed-spacing-x1: var(--cp-space-1);
+  --seed-spacing-x2: var(--cp-space-2);
+  --seed-spacing-x3: var(--cp-space-3);
+  --seed-spacing-x4: var(--cp-space-4);
+  --seed-spacing-x6: var(--cp-space-6);
+  --seed-spacing-x8: var(--cp-space-8);
+  --seed-radius-r1: var(--cp-radius-sm);
+  --seed-radius-r2: var(--cp-radius-md);
+  --seed-radius-r3: var(--cp-radius-lg);
+  --seed-color-fg-neutral: var(--cp-ink);
+  --seed-color-bg-layer-default: var(--cp-surface);
+  --seed-color-bg-brand-solid: var(--cp-brand);
+  --seed-color-stroke-neutral-muted: var(--cp-border);
+
   --background: 40 14% 96%;
   --foreground: 60 3% 12%;
   --muted: 40 10% 94%;

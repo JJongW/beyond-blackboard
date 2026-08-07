@@ -13,7 +13,10 @@ import {
   studentAvatarSrc,
 } from "@/constants/designTokens";
 import CrepassIcon from "@/components/ui/CrepassIcon";
+import ActionButton from "@/components/ui/ActionButton";
 import EmptyState from "@/components/ui/EmptyState";
+import TextField from "@/components/ui/TextField";
+import { SkeletonListRows } from "@/components/ui/Skeleton";
 import {
   DsDoDont,
   DsPageHeader,
@@ -160,21 +163,22 @@ function renderDemo(demo: NonNullable<DsDoc["demo"]>) {
     case "button":
       return (
         <div className="flex flex-wrap items-center gap-3">
-          <button type="button" className="cp-btn-primary">
-            저장
-          </button>
-          <button type="button" className="cp-btn-secondary">
-            취소
-          </button>
-          <button type="button" className="cp-btn-ghost">
-            더보기
-          </button>
-          <button
-            type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-brand"
+          <ActionButton variant="brandSolid">저장</ActionButton>
+          <ActionButton variant="neutralWeak">취소</ActionButton>
+          <ActionButton variant="ghost">더보기</ActionButton>
+          <ActionButton
+            variant="brandSolid"
             aria-label="추가"
+            className="!px-0 w-10"
           >
-            <CrepassIcon name="add" size={22} className="text-white" />
+            <CrepassIcon name="add" size={20} className="text-white" />
+          </ActionButton>
+          <ActionButton variant="brandSolid" loading>
+            저장 중
+          </ActionButton>
+        </div>
+      );
+    case "chip":
       return (
         <div className="flex flex-wrap gap-2">
           {["전체", "출석", "결석", "지각"].map((label, i) => (
@@ -194,24 +198,17 @@ function renderDemo(demo: NonNullable<DsDoc["demo"]>) {
     case "input":
       return (
         <div className="max-w-md space-y-3">
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-ink">
-              학생 이름
-            </span>
-            <input
-              className="cp-input w-full"
-              placeholder="이름을 입력하세요"
-            />
-          </label>
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-ink">
-              메모
-            </span>
-            <textarea
-              className="cp-input w-full min-h-[88px] resize-y"
-              placeholder="특이사항을 적어 주세요"
-            />
-          </label>
+          <TextField
+            id="ds-demo-name"
+            label="학생 이름"
+            placeholder="이름을 입력하세요"
+          />
+          <TextField
+            id="ds-demo-memo"
+            label="메모"
+            multiline
+            placeholder="특이사항을 적어 주세요"
+          />
         </div>
       );
     case "avatar":
@@ -253,16 +250,8 @@ function renderDemo(demo: NonNullable<DsDoc["demo"]>) {
       );
     case "skeleton":
       return (
-        <div className="max-w-md space-y-3" aria-hidden>
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div className="h-10 w-10 animate-pulse rounded-full bg-border" />
-              <div className="flex-1 space-y-2">
-                <div className="h-3 w-2/3 animate-pulse rounded bg-border" />
-                <div className="h-3 w-1/2 animate-pulse rounded bg-border/70" />
-              </div>
-            </div>
-          ))}
+        <div className="max-w-md">
+          <SkeletonListRows count={3} />
         </div>
       );
     case "badge":

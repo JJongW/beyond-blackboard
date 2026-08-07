@@ -5,7 +5,7 @@
  * 생성: 스크립트 — 내용 수정 시 이 파일 또는 생성 스크립트 갱신
  */
 
-/** CrepassIcon 이름 레지스트리 — public/images/icons/icon-{name}.png */
+/** CrepassIcon 이름 레지스트리 — SVG Line/Fill (CrepassGlyphIcon). PNG 스티커 미사용 */
 export const CREPASS_ICON_NAMES = [
   "home",
   "documents",

@@ -1,12 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import MainLayout from "@/components/layout/MainLayout";
+import PageHeader from "@/components/ui/PageHeader";
+import ActionButton from "@/components/ui/ActionButton";
+import Snackbar from "@/components/ui/Snackbar";
+import CrepassIcon from "@/components/ui/CrepassIcon";
+import Badge from "@/components/ui/Badge";
 import { ClassPeriod, Student, AttendanceStatus } from "@/types";
 import { studentAvatarSrc } from "@/constants/designTokens";
 
-// 임시 데이터 (실제로는 API에서 가져올 데이터)
 const mockClassPeriod: ClassPeriod = {
   id: "1",
   subject: "수학",
@@ -131,48 +136,60 @@ const mockStudents: Student[] = [
   },
 ];
 
-// 출결 상태별 설정
-const attendanceConfig = {
+/** Soft UI 파스텔 상태 칩 — 형광 Tailwind 금지 */
+const attendanceConfig: Record<
+  AttendanceStatus,
+  { label: string; selected: string; idle: string; dot: string }
+> = {
   present: {
     label: "출석",
-    color: "bg-green-500",
-    hoverColor: "hover:bg-green-600",
+    selected: "bg-brand text-white",
+    idle: "bg-brand-muted text-brand-ink hover:bg-brand/20",
+    dot: "bg-brand",
   },
   absent: {
     label: "결석",
-    color: "bg-red-500",
-    hoverColor: "hover:bg-red-600",
+    selected: "bg-danger text-white",
+    idle: "bg-[#F8EDEA] text-[var(--cp-danger)] hover:bg-[#F0D9D5]",
+    dot: "bg-danger",
   },
   late: {
     label: "지각",
-    color: "bg-yellow-500",
-    hoverColor: "hover:bg-yellow-600",
+    selected: "bg-[var(--cp-warning)] text-white",
+    idle: "bg-[#F5F0E6] text-[var(--cp-warning)] hover:bg-[#EBE3D4]",
+    dot: "bg-[var(--cp-warning)]",
   },
   early_leave: {
     label: "조퇴",
-    color: "bg-orange-500",
-    hoverColor: "hover:bg-orange-600",
+    selected: "bg-ink-secondary text-white",
+    idle: "bg-surface-elevated text-ink-secondary border border-line hover:border-line-strong",
+    dot: "bg-ink-secondary",
   },
   sick_leave: {
     label: "병결",
-    color: "bg-blue-500",
-    hoverColor: "hover:bg-blue-600",
+    selected: "bg-brand-ink text-white",
+    idle: "bg-brand-muted/70 text-brand-ink hover:bg-brand-muted",
+    dot: "bg-brand-ink",
   },
   official_leave: {
     label: "공결",
-    color: "bg-purple-500",
-    hoverColor: "hover:bg-purple-600",
+    selected: "bg-ink text-white",
+    idle: "bg-surface-elevated text-ink border border-line hover:border-line-strong",
+    dot: "bg-ink",
   },
 };
 
+/**
+ * 출결 상세 — Soft UI 토큰 + ActionButton / Snackbar
+ */
 export default function AttendanceDetailPage() {
-  // 상세 API 연동 시 periodId로 교시 로드
   const params = useParams();
   const periodId = typeof params.id === "string" ? params.id : "1";
   const router = useRouter();
-  const [attendanceRecords, setAttendanceRecords] = useState<{
-    [studentId: string]: AttendanceStatus;
-  }>({
+  const [saving, setSaving] = useState(false);
+  const [attendanceRecords, setAttendanceRecords] = useState<
+    Record<string, AttendanceStatus>
+  >({
     "1": "present",
     "2": "present",
     "3": "late",
@@ -184,74 +201,47 @@ export default function AttendanceDetailPage() {
     "9": "present",
     "10": "present",
   });
-
-  // 알림 상태 관리
-  const [notification, setNotification] = useState<{
-    show: boolean;
+  const [snack, setSnack] = useState<{
+    open: boolean;
     message: string;
-    type: "success" | "error";
-  }>({
-    show: false,
-    message: "",
-    type: "success",
-  });
+    tone: "positive" | "critical";
+  }>({ open: false, message: "", tone: "positive" });
 
-  // 출결 상태 변경
   const updateAttendance = (studentId: string, status: AttendanceStatus) => {
-    setAttendanceRecords((prev) => ({
-      ...prev,
-      [studentId]: status,
-    }));
+    setAttendanceRecords((prev) => ({ ...prev, [studentId]: status }));
   };
 
-  // 출결 저장 함수
   const saveAttendance = async () => {
+    setSaving(true);
     try {
-      // 실제 API: await saveAttendanceAPI(periodId, attendanceRecords);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      showNotification(`출결이 저장되었습니다 (${periodId}).`, "success");
+      await new Promise((r) => setTimeout(r, 600));
+      setSnack({
+        open: true,
+        message: `출결이 저장되었습니다 (${periodId}).`,
+        tone: "positive",
+      });
     } catch {
-      // 실패 알림 표시
-      showNotification(
-        "출결 저장 중 오류가 발생했습니다. 다시 시도해주세요.",
-        "error",
-      );
+      setSnack({
+        open: true,
+        message: "출결 저장에 실패했습니다. 다시 시도해 주세요.",
+        tone: "critical",
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
-  // 알림 표시 함수
-  const showNotification = (message: string, type: "success" | "error") => {
-    setNotification({
-      show: true,
-      message,
-      type,
-    });
-
-    // 3초 후 자동으로 알림 숨기기
-    setTimeout(() => {
-      setNotification((prev) => ({ ...prev, show: false }));
-    }, 3000);
+  const stats = {
+    present: 0,
+    absent: 0,
+    late: 0,
+    early_leave: 0,
+    sick_leave: 0,
+    official_leave: 0,
   };
-
-  // 출결 통계 계산
-  const getAttendanceStats = () => {
-    const stats = {
-      present: 0,
-      absent: 0,
-      late: 0,
-      early_leave: 0,
-      sick_leave: 0,
-      official_leave: 0,
-    };
-
-    Object.values(attendanceRecords).forEach((status) => {
-      stats[status]++;
-    });
-
-    return stats;
-  };
-
-  const stats = getAttendanceStats();
+  Object.values(attendanceRecords).forEach((s) => {
+    stats[s]++;
+  });
   const presentCount =
     stats.present +
     stats.late +
@@ -262,212 +252,157 @@ export default function AttendanceDetailPage() {
 
   return (
     <MainLayout>
-      <main className="overflow-y-auto p-8 min-h-[calc(100vh-4rem)]">
-        {/* 헤더 */}
-        <header className="mb-8">
-          <nav className="text-sm text-gray-500 mb-4">
-            <button
-              onClick={() => router.push("/")}
-              className="hover:text-primary-500"
-            >
-              홈
-            </button>
-            <span className="mx-2">/</span>
-            <button
+      <main className="cp-page">
+        <PageHeader
+          title={`${mockClassPeriod.subject} ${mockClassPeriod.period}교시`}
+          description={`${mockClassPeriod.startTime}–${mockClassPeriod.endTime} · ${new Date(mockClassPeriod.date).toLocaleDateString("ko-KR")}`}
+          crumbs={[
+            { label: "홈", href: "/" },
+            { label: "출결", href: "/attendance" },
+            {
+              label: `${mockClassPeriod.subject} ${mockClassPeriod.period}교시`,
+            },
+          ]}
+          actions={
+            <ActionButton
+              variant="neutralOutline"
+              size="small"
               onClick={() => router.push("/attendance")}
-              className="hover:text-primary-500"
+              prefixIcon={<CrepassIcon name="chevron-left" size={16} />}
             >
-              출결 관리
-            </button>
-            <span className="mx-2">/</span>
-            <span className="text-gray-900">
-              {mockClassPeriod.subject} {mockClassPeriod.period}교시
-            </span>
-          </nav>
+              목록
+            </ActionButton>
+          }
+        />
 
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                {mockClassPeriod.subject} {mockClassPeriod.period}교시 출결 관리
-              </h1>
-              <p className="text-gray-600 text-sm sm:text-base">
-                {mockClassPeriod.startTime} - {mockClassPeriod.endTime} |{" "}
-                {new Date(mockClassPeriod.date).toLocaleDateString("ko-KR")}
-              </p>
-            </div>
-
-            <button
-              onClick={() => router.push("/attendance")}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              <i className="fas fa-arrow-left"></i>
-              <span>목록으로</span>
-            </button>
-          </div>
-        </header>
-
-        {/* 출결 통계 */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <div className="cp-card mb-6">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary-500 mb-1">
+              <p className="text-2xl font-semibold text-brand">
                 {attendanceRate}%
-              </div>
-              <div className="text-sm text-gray-600">출석률</div>
+              </p>
+              <p className="text-sm text-ink-muted">출석률</p>
             </div>
-
-            {Object.entries(attendanceConfig).map(([status, config]) => (
-              <div key={status} className="text-center">
-                <div className="text-xl font-bold text-gray-900 mb-1">
-                  {stats[status as AttendanceStatus]}
-                </div>
-                <div className="flex items-center justify-center space-x-1">
-                  <div className={`w-3 h-3 rounded-full ${config.color}`}></div>
-                  <span className="text-sm text-gray-600">{config.label}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 학생 목록 및 출결 체크 */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">
-              학생 출결 체크
-            </h2>
-            <p className="text-gray-600 text-sm mt-1">
-              각 학생의 출결 상태를 클릭하여 변경할 수 있습니다.
-            </p>
-          </div>
-
-          <div className="divide-y divide-gray-200">
-            {mockStudents.map((student, index) => (
-              <div
-                key={student.id}
-                className="p-6 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    {/* pastel 학생 아바타 — gender 기반 */}
-                    {student.avatar ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={student.avatar}
-                        alt={student.name}
-                        className="h-10 w-10 flex-shrink-0 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-                        <span className="text-sm font-medium text-gray-600">
-                          {index + 1}
-                        </span>
-                      </div>
-                    )}
-
-                    <div>
-                      <h3 className="font-medium text-gray-900">
-                        {student.name}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {student.studentNumber} | {student.class}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* 출결 상태 버튼들 */}
-                  <div className="flex items-center space-x-2">
-                    {Object.entries(attendanceConfig).map(
-                      ([status, config]) => (
-                        <button
-                          key={status}
-                          onClick={() =>
-                            updateAttendance(
-                              student.id,
-                              status as AttendanceStatus,
-                            )
-                          }
-                          className={`
-                          w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center
-                          ${
-                            attendanceRecords[student.id] === status
-                              ? `${config.color} ring-2 ring-offset-2 ring-gray-300`
-                              : `bg-gray-200 ${config.hoverColor} hover:scale-110`
-                          }
-                        `}
-                          title={config.label}
-                        >
-                          {attendanceRecords[student.id] === status && (
-                            <i className="fas fa-check text-white text-xs"></i>
-                          )}
-                        </button>
-                      ),
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 저장 버튼 */}
-        <div className="mt-6 flex justify-end">
-          <button
-            onClick={saveAttendance}
-            className="flex items-center space-x-2 bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors"
-          >
-            <i className="fas fa-save"></i>
-            <span>출결 저장</span>
-          </button>
-        </div>
-
-        {/* 토스트 알림 */}
-        {notification.show && (
-          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-slide-in-down">
-            <div
-              className={`
-              max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 p-4
-              ${
-                notification.type === "success"
-                  ? "border-green-500"
-                  : "border-red-500"
-              }
-            `}
-            >
-              <div className="flex items-center">
-                <div
-                  className={`
-                  flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center
-                  ${
-                    notification.type === "success"
-                      ? "bg-green-100 text-green-600"
-                      : "bg-red-100 text-red-600"
-                  }
-                `}
-                >
-                  <i
-                    className={`fas ${
-                      notification.type === "success" ? "fa-check" : "fa-times"
-                    } text-sm`}
-                  ></i>
-                </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-900">
-                    {notification.message}
+            {(Object.keys(attendanceConfig) as AttendanceStatus[]).map(
+              (status) => (
+                <div key={status} className="text-center">
+                  <p className="text-xl font-semibold text-ink">
+                    {stats[status]}
+                  </p>
+                  <p className="mt-1 inline-flex items-center justify-center gap-1.5 text-sm text-ink-muted">
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full ${attendanceConfig[status].dot}`}
+                    />
+                    {attendanceConfig[status].label}
                   </p>
                 </div>
-                <button
-                  onClick={() =>
-                    setNotification((prev) => ({ ...prev, show: false }))
-                  }
-                  className="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <i className="fas fa-times text-sm"></i>
-                </button>
-              </div>
-            </div>
+              ),
+            )}
           </div>
-        )}
+        </div>
+
+        <section className="cp-card !p-0 overflow-hidden">
+          <div className="border-b border-line px-5 py-4">
+            <h2 className="cp-h3">학생 출결</h2>
+            <p className="mt-1 text-sm text-ink-muted">
+              상태를 눌러 변경한 뒤 저장하세요.
+            </p>
+          </div>
+          <ul className="divide-y divide-line">
+            {mockStudents.map((student, index) => {
+              const src = student.avatar ?? studentAvatarSrc(student.gender);
+              return (
+                <li
+                  key={student.id}
+                  className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between hover:bg-surface-elevated/60"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Image
+                      src={src}
+                      alt=""
+                      width={40}
+                      height={40}
+                      className="rounded-full border border-line object-cover"
+                    />
+                    <div className="min-w-0">
+                      <p className="font-medium text-ink">
+                        <span className="mr-2 text-ink-subtle">
+                          {index + 1}
+                        </span>
+                        {student.name}
+                      </p>
+                      <p className="text-sm text-ink-muted">
+                        {student.studentNumber} · {student.class}
+                      </p>
+                    </div>
+                    <Badge tone="neutral" className="hidden sm:inline-flex">
+                      {
+                        attendanceConfig[
+                          attendanceRecords[student.id] ?? "present"
+                        ].label
+                      }
+                    </Badge>
+                  </div>
+                  <div
+                    className="flex flex-wrap gap-1.5"
+                    role="group"
+                    aria-label={`${student.name} 출결`}
+                  >
+                    {(Object.keys(attendanceConfig) as AttendanceStatus[]).map(
+                      (status) => {
+                        const cfg = attendanceConfig[status];
+                        const selected =
+                          attendanceRecords[student.id] === status;
+                        return (
+                          <button
+                            key={status}
+                            type="button"
+                            onClick={() => updateAttendance(student.id, status)}
+                            className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-xs font-medium transition-colors ${
+                              selected ? cfg.selected : cfg.idle
+                            }`}
+                            aria-pressed={selected}
+                          >
+                            {selected && (
+                              <CrepassIcon
+                                name="check"
+                                size={14}
+                                className="mr-0.5 text-inherit"
+                              />
+                            )}
+                            {cfg.label}
+                          </button>
+                        );
+                      },
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
+        <div className="mt-6 flex justify-end">
+          <ActionButton
+            variant="brandSolid"
+            onClick={saveAttendance}
+            loading={saving}
+            prefixIcon={
+              !saving ? (
+                <CrepassIcon name="check" size={18} className="text-white" />
+              ) : undefined
+            }
+          >
+            출결 저장
+          </ActionButton>
+        </div>
+
+        <Snackbar
+          open={snack.open}
+          message={snack.message}
+          tone={snack.tone}
+          onClose={() => setSnack((s) => ({ ...s, open: false }))}
+        />
       </main>
     </MainLayout>
   );
