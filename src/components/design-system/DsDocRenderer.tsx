@@ -17,6 +17,8 @@ import ActionButton from "@/components/ui/ActionButton";
 import EmptyState from "@/components/ui/EmptyState";
 import TextField from "@/components/ui/TextField";
 import { SkeletonListRows } from "@/components/ui/Skeleton";
+import Chip from "@/components/ui/Chip";
+import Avatar from "@/components/ui/Avatar";
 import {
   DsDoDont,
   DsPageHeader,
@@ -182,16 +184,9 @@ function renderDemo(demo: NonNullable<DsDoc["demo"]>) {
       return (
         <div className="flex flex-wrap gap-2">
           {["전체", "출석", "결석", "지각"].map((label, i) => (
-            <span
-              key={label}
-              className={`rounded-md px-2.5 py-1 text-sm ${
-                i === 0
-                  ? "bg-brand-muted text-brand-ink font-medium"
-                  : "border border-line bg-surface-card text-ink-secondary"
-              }`}
-            >
+            <Chip key={label} selected={i === 0}>
               {label}
-            </span>
+            </Chip>
           ))}
         </div>
       );
@@ -214,29 +209,10 @@ function renderDemo(demo: NonNullable<DsDoc["demo"]>) {
     case "avatar":
       return (
         <div className="flex items-center gap-4">
-          {BRAND.avatar && (
-            <Image
-              src={BRAND.avatar}
-              alt="교사"
-              width={56}
-              height={56}
-              className="rounded-full border border-line"
-            />
-          )}
-          <Image
-            src={studentAvatarSrc("male")}
-            alt="남학생"
-            width={48}
-            height={48}
-            className="rounded-full border border-line"
-          />
-          <Image
-            src={studentAvatarSrc("female")}
-            alt="여학생"
-            width={48}
-            height={48}
-            className="rounded-full border border-line"
-          />
+          <Avatar brand alt="교사" size={56} />
+          <Avatar gender="male" alt="남학생" size={48} />
+          <Avatar gender="female" alt="여학생" size={48} />
+          <Avatar fallback="김민" alt="이니셜" size={40} />
         </div>
       );
     case "empty":

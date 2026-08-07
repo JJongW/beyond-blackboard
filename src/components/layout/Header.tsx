@@ -9,7 +9,9 @@ import { BRAND } from "@/constants/designTokens";
 import { NAV_ICON_BY_HREF } from "@/constants/designSystemNav";
 import { User } from "@/types";
 import CrepassIcon from "@/components/ui/CrepassIcon";
-import { NotificationBadge } from "@/components/ui/Badge";
+import Badge, { NotificationBadge } from "@/components/ui/Badge";
+import Avatar from "@/components/ui/Avatar";
+import List, { ListItem } from "@/components/ui/List";
 import MobileMenu from "./MobileMenu";
 
 interface HeaderProps {
@@ -17,7 +19,7 @@ interface HeaderProps {
 }
 
 /**
- * 헤더 — Seed Top Navigation = Line 아이콘 (배경 네모 없음)
+ * 헤더 — Top Nav Line 아이콘 + Avatar + List 알림 패널
  */
 const Header: React.FC<HeaderProps> = ({ user }) => {
   const pathname = usePathname();
@@ -118,13 +120,12 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
               }}
             >
               <CrepassIcon name="bell" size={22} />
-              {/* Seed Notification Badge */}
               <NotificationBadge count={NOTICES.length} />
             </button>
 
             {isNotifOpen && (
               <div
-                className="absolute right-0 mt-2 w-80 rounded-md border border-line bg-surface-card shadow-float z-50"
+                className="absolute right-0 mt-2 w-80 overflow-hidden rounded-md border border-line bg-surface-card shadow-float z-50"
                 role="dialog"
                 aria-label="알림"
               >
@@ -139,27 +140,27 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
                     <CrepassIcon name="close" size={18} />
                   </button>
                 </div>
-                <ul className="max-h-72 overflow-y-auto divide-y divide-line">
-                  {NOTICES.slice(0, 5).map((notice) => (
-                    <li key={notice.id}>
-                      <div className="px-4 py-3">
-                        <p className="text-base font-medium text-ink line-clamp-1">
-                          {notice.isImportant && (
-                            <span className="mr-1.5 text-danger">중요</span>
-                          )}
-                          {notice.title}
-                        </p>
-                        <p className="cp-caption mt-1 line-clamp-2">
-                          {notice.content}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                {NOTICES.length === 0 && (
-                  <p className="px-4 py-8 text-center text-sm text-ink-muted">
+                {NOTICES.length === 0 ? (
+                  <p className="px-4 py-10 text-center text-sm text-ink-muted">
                     새 알림이 없습니다
                   </p>
+                ) : (
+                  <List bordered={false} className="max-h-72 overflow-y-auto">
+                    {NOTICES.slice(0, 5).map((notice) => (
+                      <ListItem
+                        key={notice.id}
+                        title={notice.title}
+                        description={notice.content}
+                        trailing={
+                          notice.isImportant ? (
+                            <Badge tone="critical" size="small">
+                              중요
+                            </Badge>
+                          ) : undefined
+                        }
+                      />
+                    ))}
+                  </List>
                 )}
               </div>
             )}
@@ -176,13 +177,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
                 setIsNotifOpen(false);
               }}
             >
-              <Image
-                src={BRAND.avatar}
-                alt=""
-                width={32}
-                height={32}
-                className="rounded-full border border-line"
-              />
+              <Avatar brand alt="" size={32} />
               <span className="text-base font-medium text-ink hidden md:inline">
                 {currentUser.name}
               </span>

@@ -3,7 +3,11 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import MainLayout from "@/components/layout/MainLayout";
+import PageHeader from "@/components/ui/PageHeader";
 import CrepassIcon from "@/components/ui/CrepassIcon";
+import Chip from "@/components/ui/Chip";
+import Badge from "@/components/ui/Badge";
+import EmptyState from "@/components/ui/EmptyState";
 import type { CrepassIconName } from "@/constants/designSystemNav";
 
 interface RecordTemplate {
@@ -71,7 +75,7 @@ const CATEGORY_CONFIG: Record<
 };
 
 /**
- * 생기부 목록 — CrepassIcon 카테고리 아이콘
+ * 생기부 목록 — Chip 필터 + Badge + EmptyState 통일
  */
 export default function RecordsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -81,7 +85,6 @@ export default function RecordsPage() {
       ? RECORD_TEMPLATES
       : RECORD_TEMPLATES.filter((t) => t.category === selectedCategory);
 
-  // CATEGORY_CONFIG 키와 동일 집합 — 칩 카운트 인덱싱 타입 안전
   const categoryCounts: Record<"all" | keyof typeof CATEGORY_CONFIG, number> = {
     all: RECORD_TEMPLATES.length,
     academic: RECORD_TEMPLATES.filter((t) => t.category === "academic").length,
@@ -95,54 +98,49 @@ export default function RecordsPage() {
   return (
     <MainLayout>
       <main className="cp-page">
-        <header className="mb-8">
-          <nav className="cp-caption mb-3" aria-label="경로">
-            <Link href="/" className="cp-link">
-              홈
-            </Link>
-            <span className="mx-2 text-ink-subtle">/</span>
-            <span className="text-ink">생기부</span>
-          </nav>
-          <h1 className="cp-h1">생기부</h1>
-          <p className="mt-1 text-sm text-ink-muted">
-            템플릿 {RECORD_TEMPLATES.length}개
-          </p>
-        </header>
+        <PageHeader
+          title="생기부"
+          description={`템플릿 ${RECORD_TEMPLATES.length}개`}
+          crumbs={[{ label: "홈", href: "/" }, { label: "생기부" }]}
+        />
 
-        <div className="mb-6 flex flex-wrap gap-2">
-          <button
-            type="button"
+        <div
+          className="mb-6 flex flex-wrap gap-2"
+          role="group"
+          aria-label="카테고리"
+        >
+          <Chip
+            selected={selectedCategory === "all"}
             onClick={() => setSelectedCategory("all")}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              selectedCategory === "all"
-                ? "bg-brand text-white"
-                : "bg-surface-card border border-line text-ink-secondary hover:bg-surface-elevated"
-            }`}
           >
             전체 ({categoryCounts.all})
-          </button>
+          </Chip>
           {(
             Object.keys(CATEGORY_CONFIG) as Array<keyof typeof CATEGORY_CONFIG>
           ).map((key) => (
-            <button
+            <Chip
               key={key}
-              type="button"
+              selected={selectedCategory === key}
               onClick={() => setSelectedCategory(key)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                selectedCategory === key
-                  ? "bg-brand text-white"
-                  : "bg-surface-card border border-line text-ink-secondary hover:bg-surface-elevated"
-              }`}
+              prefix={
+                <CrepassIcon
+                  name={CATEGORY_CONFIG[key].icon}
+                  size={14}
+                  className="text-inherit"
+                />
+              }
             >
               {CATEGORY_CONFIG[key].label} ({categoryCounts[key]})
-            </button>
+            </Chip>
           ))}
         </div>
 
         {filteredTemplates.length === 0 ? (
-          <div className="cp-card py-12 text-center text-sm text-ink-muted">
-            해당 카테고리 템플릿이 없습니다.
-          </div>
+          <EmptyState
+            icon="records"
+            title="해당 카테고리 템플릿이 없습니다"
+            description="다른 카테고리를 선택해 보세요."
+          />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredTemplates.map((template) => {
@@ -163,9 +161,9 @@ export default function RecordsPage() {
                       <div className="mb-1 flex items-start justify-between gap-2">
                         <h3 className="cp-h3 line-clamp-2">{template.title}</h3>
                         {template.recentlyUsed && (
-                          <span className="cp-chip shrink-0 border border-line bg-surface text-ink-muted">
+                          <Badge tone="brand" size="small">
                             최근
-                          </span>
+                          </Badge>
                         )}
                       </div>
                       <p className="text-sm text-ink-muted line-clamp-2">

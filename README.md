@@ -265,9 +265,9 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ template, className }) => {
 
 ### P0.5 (Phase 1에 포함)
 
-- [ ] Chip / Badge / Callout / EmptyState API Seed화
-- [ ] `SegmentedControl`, `List`, `Avatar`
-- [ ] `students` 세그먼트·모달 교체, `records` 필터 통일, Header 알림 패널 정리
+- [x] Chip / Badge / Callout / EmptyState API Seed화
+- [x] `SegmentedControl`, `List`, `Avatar`
+- [x] `students` 세그먼트·모달 교체, `records` 필터 통일, Header 알림 패널 정리
 
 ### Phase 1 밖 (다음)
 

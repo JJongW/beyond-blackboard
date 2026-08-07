@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import MainLayout from "@/components/layout/MainLayout";
 import PageHeader from "@/components/ui/PageHeader";
 import CrepassIcon from "@/components/ui/CrepassIcon";
@@ -9,12 +8,16 @@ import Chip from "@/components/ui/Chip";
 import Badge from "@/components/ui/Badge";
 import Callout from "@/components/ui/Callout";
 import EmptyState from "@/components/ui/EmptyState";
+import ActionButton from "@/components/ui/ActionButton";
+import Avatar from "@/components/ui/Avatar";
+import SegmentedControl from "@/components/ui/SegmentedControl";
+import List, { ListItem } from "@/components/ui/List";
+import { AlertDialog } from "@/components/ui/Dialog";
 import { Student } from "@/types";
 import { studentAvatarSrc } from "@/constants/designTokens";
 
 /**
- * 학생 관리 — Seed Chip / Badge / Segmented / Empty / Dialog 톤 적용
- * 아바타·서비스 스티커는 유지, UI 아이콘은 투명 글리프
+ * 학생 관리 — SegmentedControl / Avatar / List / AlertDialog 연결
  */
 export default function StudentsPage() {
   const [viewMode, setViewMode] = useState<"card" | "list">("card");
@@ -88,9 +91,6 @@ export default function StudentsPage() {
     return matchesSearch && matchesGrade;
   });
 
-  const avatarFor = (student: Student) =>
-    student.avatar ?? studentAvatarSrc(student.gender);
-
   const grades = ["전체", "1", "2", "3"];
 
   return (
@@ -101,14 +101,15 @@ export default function StudentsPage() {
           description={`${filteredStudents.length}명`}
           crumbs={[{ label: "홈", href: "/" }, { label: "학생" }]}
           actions={
-            <button
-              type="button"
+            <ActionButton
+              variant="brandSolid"
               onClick={() => setShowAddModal(true)}
-              className="cp-btn-primary"
+              prefixIcon={
+                <CrepassIcon name="add" size={18} className="text-white" />
+              }
             >
-              <CrepassIcon name="add" size={18} className="text-white" />
               학생 등록
-            </button>
+            </ActionButton>
           }
         />
 
@@ -159,34 +160,15 @@ export default function StudentsPage() {
           <p className="text-sm text-ink-muted">
             총 {filteredStudents.length}명
           </p>
-          {/* Seed Segmented Control */}
-          <div
-            className="inline-flex rounded-md border border-line bg-surface-elevated p-1"
-            role="tablist"
+          <SegmentedControl
             aria-label="보기 방식"
-          >
-            {(
-              [
-                ["card", "카드"],
-                ["list", "리스트"],
-              ] as const
-            ).map(([mode, label]) => (
-              <button
-                key={mode}
-                type="button"
-                role="tab"
-                aria-selected={viewMode === mode}
-                onClick={() => setViewMode(mode)}
-                className={`rounded-sm px-3 py-1.5 text-sm font-medium transition-colors ${
-                  viewMode === mode
-                    ? "bg-surface-card text-ink shadow-sm"
-                    : "text-ink-muted hover:text-ink"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+            value={viewMode}
+            onChange={setViewMode}
+            options={[
+              { value: "card", label: "카드" },
+              { value: "list", label: "리스트" },
+            ]}
+          />
         </div>
 
         {filteredStudents.length === 0 ? (
@@ -200,12 +182,11 @@ export default function StudentsPage() {
             {filteredStudents.map((student) => (
               <article key={student.id} className="cp-card !p-5">
                 <div className="mb-4 flex items-center justify-between">
-                  <Image
-                    src={avatarFor(student)}
+                  <Avatar
+                    src={student.avatar}
+                    gender={student.gender}
                     alt=""
-                    width={48}
-                    height={48}
-                    className="rounded-full border border-line object-cover"
+                    size={48}
                   />
                   <button
                     type="button"
@@ -238,89 +219,58 @@ export default function StudentsPage() {
             ))}
           </div>
         ) : (
-          <ul className="cp-card !p-0 divide-y divide-line overflow-hidden">
+          <List>
             {filteredStudents.map((student) => (
-              <li
+              <ListItem
                 key={student.id}
-                className="flex items-center gap-4 px-4 py-3.5 hover:bg-surface-elevated"
-              >
-                <Image
-                  src={avatarFor(student)}
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="rounded-full border border-line object-cover"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-ink">{student.name}</p>
-                  <p className="text-sm text-ink-muted">
-                    {student.class} · {student.studentNumber}
-                  </p>
-                </div>
-                <div className="hidden flex-wrap gap-1 sm:flex">
-                  {student.tags.slice(0, 2).map((tag) => (
-                    <Badge key={tag}>{tag}</Badge>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => toggleFavorite(student.id)}
-                  aria-label={
-                    student.isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가"
-                  }
-                  className={`inline-flex h-9 w-9 items-center justify-center rounded-md ${
-                    student.isFavorite ? "text-brand" : "text-ink-muted"
-                  }`}
-                >
-                  <CrepassIcon
-                    name={student.isFavorite ? "star" : "star-outline"}
-                    size={20}
+                leading={
+                  <Avatar
+                    src={student.avatar}
+                    gender={student.gender}
+                    alt=""
+                    size={40}
                   />
-                </button>
-              </li>
+                }
+                title={student.name}
+                description={`${student.class} · ${student.studentNumber}`}
+                trailing={
+                  <div className="flex items-center gap-2">
+                    <div className="hidden flex-wrap gap-1 sm:flex">
+                      {student.tags.slice(0, 2).map((tag) => (
+                        <Badge key={tag}>{tag}</Badge>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleFavorite(student.id)}
+                      aria-label={
+                        student.isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가"
+                      }
+                      className={`inline-flex h-9 w-9 items-center justify-center rounded-md ${
+                        student.isFavorite ? "text-brand" : "text-ink-muted"
+                      }`}
+                    >
+                      <CrepassIcon
+                        name={student.isFavorite ? "star" : "star-outline"}
+                        size={20}
+                      />
+                    </button>
+                  </div>
+                }
+              />
             ))}
-          </ul>
+          </List>
         )}
 
-        {/* Seed Alert Dialog 톤 — 스크림 + 확인 */}
-        {showAddModal && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4"
-            role="presentation"
-            onClick={() => setShowAddModal(false)}
-          >
-            <div
-              className="cp-panel-overlay w-full max-w-md p-6"
-              role="dialog"
-              aria-modal
-              aria-labelledby="add-student-title"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3 id="add-student-title" className="cp-h3">
-                새 학생 등록
-              </h3>
-              <p className="mt-2 text-sm text-ink-secondary">
-                학생 등록은 곧 연결됩니다. 지금은 미리보기입니다.
-              </p>
-              <div className="mt-6 flex justify-end gap-2">
-                <button
-                  type="button"
-                  className="cp-btn-secondary"
-                  onClick={() => setShowAddModal(false)}
-                >
-                  닫기
-                </button>
-                <button
-                  type="button"
-                  className="cp-btn-primary"
-                  onClick={() => setShowAddModal(false)}
-                >
-                  확인
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <AlertDialog
+          open={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          title="새 학생 등록"
+          description="학생 등록은 곧 연결됩니다. 지금은 미리보기입니다."
+          confirmLabel="확인"
+          cancelLabel="닫기"
+          onConfirm={() => setShowAddModal(false)}
+        />
       </main>
     </MainLayout>
   );
