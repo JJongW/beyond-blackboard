@@ -63,6 +63,16 @@ export type DsDoc = {
     | "skeleton"
     | "badge"
     | "controls"
+    | "checkbox"
+    | "radio"
+    | "switch"
+    | "select"
+    | "tabs"
+    | "menu"
+    | "progress"
+    | "segmented"
+    | "list"
+    | "loading"
     | "icons"
     | "color"
     | "type"
@@ -499,6 +509,7 @@ export const DS_PATTERNS: DsDoc[] = [
         body: "시작 → 진행 → 완료/실패. 실패 시 원인과 재시도 행동을 Result Section으로 제공합니다.",
       },
     ],
+    demo: "loading",
     dos: ["1초 미만 스피너 금지", "실패에 재시도 제공"],
     donts: ["레이아웃 모르는 화면에 Skeleton 억지"],
   },
@@ -1017,7 +1028,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
-    demo: "controls",
+    demo: "checkbox",
     related: [
       {
         title: "Color",
@@ -1697,6 +1708,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
+    demo: "list",
     related: [
       {
         title: "Color",
@@ -1749,6 +1761,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
+    demo: "menu",
     related: [
       {
         title: "Color",
@@ -1958,6 +1971,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
+    demo: "progress",
     related: [
       {
         title: "Color",
@@ -2062,7 +2076,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
-    demo: "controls",
+    demo: "radio",
     related: [
       {
         title: "Color",
@@ -2272,6 +2286,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
+    demo: "segmented",
     related: [
       {
         title: "Color",
@@ -2324,6 +2339,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
+    demo: "select",
     related: [
       {
         title: "Color",
@@ -2376,6 +2392,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
+    demo: "select",
     related: [
       {
         title: "Color",
@@ -2689,7 +2706,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
-    demo: "controls",
+    demo: "switch",
     related: [
       {
         title: "Color",
@@ -2742,6 +2759,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
+    demo: "tabs",
     related: [
       {
         title: "Color",

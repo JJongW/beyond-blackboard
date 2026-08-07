@@ -5,6 +5,12 @@ import MainLayout from "@/components/layout/MainLayout";
 import CrepassIcon from "@/components/ui/CrepassIcon";
 import Callout from "@/components/ui/Callout";
 import Badge from "@/components/ui/Badge";
+import Checkbox from "@/components/ui/Checkbox";
+import Switch from "@/components/ui/Switch";
+import Tabs from "@/components/ui/Tabs";
+import ActionButton from "@/components/ui/ActionButton";
+import Menu, { MenuDotsTrigger } from "@/components/ui/Menu";
+import RadioGroup from "@/components/ui/RadioGroup";
 
 /**
  * 홈 대시보드
@@ -45,6 +51,9 @@ export default function HomePage() {
     "low" | "medium" | "high"
   >("medium");
 
+  const [hideCompleted, setHideCompleted] = useState(false);
+  const [homeTab, setHomeTab] = useState<"todo" | "news">("todo");
+
   const addTodo = () => {
     if (!newTodoText.trim()) return;
     setTodos([
@@ -67,11 +76,13 @@ export default function HomePage() {
     setIsAddingTodo(false);
   };
 
-  const sortedTodos = [...todos].sort((a, b) => {
-    if (a.completed !== b.completed) return a.completed ? 1 : -1;
-    const order = { high: 3, medium: 2, low: 1 };
-    return order[b.priority] - order[a.priority];
-  });
+  const sortedTodos = [...todos]
+    .filter((t) => !(hideCompleted && t.completed))
+    .sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      const order = { high: 3, medium: 2, low: 1 };
+      return order[b.priority] - order[a.priority];
+    });
 
   const educationNews = [
     {
@@ -130,192 +141,185 @@ export default function HomePage() {
         </Callout>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* 할 일 — 1순위 */}
           <section
             className="lg:col-span-2 space-y-4"
             aria-labelledby="todo-heading"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 id="todo-heading" className="cp-h2">
-                할 일
+                오늘 업무
               </h2>
-              <button
-                type="button"
-                onClick={() => setIsAddingTodo(true)}
-                className="inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-md hover:opacity-90 transition-opacity"
-                aria-label="할 일 추가"
-              >
-                <CrepassIcon name="add" size={28} />
-              </button>
-            </div>
-
-            <div className="cp-card !p-4">
-              {isAddingTodo && (
-                <div className="mb-4 space-y-3 rounded-md border border-dashed border-line-strong bg-surface p-4">
-                  <label className="sr-only" htmlFor="new-todo">
-                    새 할 일
-                  </label>
-                  <input
-                    id="new-todo"
-                    type="text"
-                    value={newTodoText}
-                    onChange={(e) => setNewTodoText(e.target.value)}
-                    placeholder="할 일 입력"
-                    className="cp-input"
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") addTodo();
-                      if (e.key === "Escape") cancelAddTodo();
-                    }}
-                  />
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <label
-                        htmlFor="todo-priority"
-                        className="text-xs font-medium text-ink-muted"
-                      >
-                        우선순위
-                      </label>
-                      <select
-                        id="todo-priority"
-                        value={newTodoPriority}
-                        onChange={(e) =>
-                          setNewTodoPriority(
-                            e.target.value as "low" | "medium" | "high",
-                          )
-                        }
-                        className="cp-input !w-auto !py-1.5 !text-xs"
-                      >
-                        <option value="low">낮음</option>
-                        <option value="medium">보통</option>
-                        <option value="high">높음</option>
-                      </select>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={cancelAddTodo}
-                        className="cp-btn-ghost !py-1.5 !px-3 !text-xs"
-                      >
-                        취소
-                      </button>
-                      <button
-                        type="button"
-                        onClick={addTodo}
-                        disabled={!newTodoText.trim()}
-                        className="cp-btn-primary !py-1.5 !px-3 !text-xs"
-                      >
-                        추가
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <ul className="divide-y divide-line">
-                {sortedTodos.map((todo) => (
-                  <li
-                    key={todo.id}
-                    className={`group flex items-center gap-3 py-3 first:pt-0 last:pb-0 ${
-                      todo.completed ? "opacity-60" : ""
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setTodos(
-                          todos.map((t) =>
-                            t.id === todo.id
-                              ? { ...t, completed: !t.completed }
-                              : t,
-                          ),
-                        )
-                      }
-                      className={`flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full transition-colors ${
-                        todo.completed
-                          ? "ring-2 ring-brand"
-                          : "border-2 border-line-strong hover:border-brand"
-                      }`}
-                      aria-label={todo.completed ? "완료 취소" : "완료 표시"}
-                    >
-                      {todo.completed ? (
-                        <CrepassIcon name="check" size={24} />
-                      ) : null}
-                    </button>
-
-                    <div className="min-w-0 flex-1">
-                      <p
-                        className={`text-sm ${
-                          todo.completed
-                            ? "line-through text-ink-muted"
-                            : "text-ink"
-                        }`}
-                      >
-                        {todo.text}
-                      </p>
-                      {!todo.completed && (
-                        <span
-                          className={`cp-chip mt-1 ${priorityClass[todo.priority]}`}
-                        >
-                          {priorityLabel[todo.priority]}
-                        </span>
-                      )}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setTodos(todos.filter((t) => t.id !== todo.id))
-                      }
-                      className="opacity-0 group-hover:opacity-100 inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-surface transition-all"
-                      aria-label="삭제"
-                    >
-                      <CrepassIcon name="trash" size={22} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-
-              {todos.length === 0 && (
-                <p className="py-10 text-center text-sm text-ink-muted">
-                  할 일이 없습니다
-                </p>
-              )}
-            </div>
-
-            {/* 소식 — 압축 리스트 */}
-            <div className="pt-4">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="cp-h2">교육 소식</h2>
+              <div className="flex items-center gap-3">
+                <Switch
+                  checked={hideCompleted}
+                  onChange={setHideCompleted}
+                  label="완료 숨기기"
+                />
                 <button
                   type="button"
-                  className="text-sm font-medium text-ink-muted hover:text-brand"
+                  onClick={() => setIsAddingTodo(true)}
+                  className="inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-md hover:opacity-90 transition-opacity"
+                  aria-label="할 일 추가"
                 >
-                  더보기
+                  <CrepassIcon name="add" size={28} />
                 </button>
               </div>
-              <ul className="cp-card !p-0 divide-y divide-line">
-                {educationNews.map((news) => (
-                  <li key={news.id}>
-                    <button
-                      type="button"
-                      className="flex w-full items-baseline gap-3 px-5 py-3.5 text-left hover:bg-surface-elevated transition-colors"
-                    >
-                      <Badge tone="neutral" className="shrink-0">
-                        {news.category}
-                      </Badge>
-                      <span className="min-w-0 flex-1 text-sm font-medium text-ink truncate">
-                        {news.title}
-                      </span>
-                      <time className="cp-caption shrink-0">{news.date}</time>
-                    </button>
-                  </li>
-                ))}
-              </ul>
             </div>
+
+            <Tabs
+              aria-label="홈 콘텐츠"
+              value={homeTab}
+              onChange={setHomeTab}
+              options={[
+                { value: "todo", label: "할 일" },
+                { value: "news", label: "소식" },
+              ]}
+            />
+
+            {homeTab === "todo" ? (
+              <div className="cp-card !p-4">
+                {isAddingTodo && (
+                  <div className="mb-4 space-y-3 rounded-md border border-dashed border-line-strong bg-surface p-4">
+                    <label className="sr-only" htmlFor="new-todo">
+                      새 할 일
+                    </label>
+                    <input
+                      id="new-todo"
+                      type="text"
+                      value={newTodoText}
+                      onChange={(e) => setNewTodoText(e.target.value)}
+                      placeholder="할 일 입력"
+                      className="cp-input"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") addTodo();
+                        if (e.key === "Escape") cancelAddTodo();
+                      }}
+                    />
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <RadioGroup
+                        legend="우선순위"
+                        direction="row"
+                        value={newTodoPriority}
+                        onChange={setNewTodoPriority}
+                        options={[
+                          { value: "low", label: "낮음" },
+                          { value: "medium", label: "보통" },
+                          { value: "high", label: "높음" },
+                        ]}
+                      />
+                      <div className="flex gap-2">
+                        <ActionButton
+                          variant="ghost"
+                          size="small"
+                          onClick={cancelAddTodo}
+                        >
+                          취소
+                        </ActionButton>
+                        <ActionButton
+                          variant="brandSolid"
+                          size="small"
+                          onClick={addTodo}
+                          disabled={!newTodoText.trim()}
+                        >
+                          추가
+                        </ActionButton>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <ul className="divide-y divide-line">
+                  {sortedTodos.map((todo) => (
+                    <li
+                      key={todo.id}
+                      className={`group flex items-center gap-3 py-3 first:pt-0 last:pb-0 ${
+                        todo.completed ? "opacity-60" : ""
+                      }`}
+                    >
+                      <Checkbox
+                        checked={todo.completed}
+                        onChange={(checked) =>
+                          setTodos(
+                            todos.map((t) =>
+                              t.id === todo.id
+                                ? { ...t, completed: checked }
+                                : t,
+                            ),
+                          )
+                        }
+                        aria-label={todo.completed ? "완료 취소" : "완료 표시"}
+                      />
+
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className={`text-sm ${
+                            todo.completed
+                              ? "line-through text-ink-muted"
+                              : "text-ink"
+                          }`}
+                        >
+                          {todo.text}
+                        </p>
+                        {!todo.completed && (
+                          <span
+                            className={`cp-chip mt-1 ${priorityClass[todo.priority]}`}
+                          >
+                            {priorityLabel[todo.priority]}
+                          </span>
+                        )}
+                      </div>
+
+                      <Menu
+                        aria-label={`${todo.text} 메뉴`}
+                        className="opacity-0 group-hover:opacity-100"
+                        trigger={<MenuDotsTrigger />}
+                        items={[
+                          {
+                            id: "del",
+                            label: "삭제",
+                            destructive: true,
+                            icon: <CrepassIcon name="trash" size={16} />,
+                            onSelect: () =>
+                              setTodos(todos.filter((t) => t.id !== todo.id)),
+                          },
+                        ]}
+                      />
+                    </li>
+                  ))}
+                </ul>
+
+                {todos.length === 0 && (
+                  <p className="py-10 text-center text-sm text-ink-muted">
+                    할 일이 없습니다
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div>
+                <ul className="cp-card !p-0 divide-y divide-line">
+                  {educationNews.map((news) => (
+                    <li key={news.id}>
+                      <button
+                        type="button"
+                        className="flex w-full items-baseline gap-3 px-5 py-3.5 text-left hover:bg-surface-elevated transition-colors"
+                      >
+                        <Badge tone="neutral" className="shrink-0">
+                          {news.category}
+                        </Badge>
+                        <span className="min-w-0 flex-1 text-sm font-medium text-ink truncate">
+                          {news.title}
+                        </span>
+                        <time className="cp-caption shrink-0">{news.date}</time>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </section>
 
-          {/* 달력 */}
+          {/* 달력 — PLACEHOLDER_CAL */}
           <section className="cp-card" aria-labelledby="cal-heading">
             <h2 id="cal-heading" className="cp-h3 mb-4">
               달력

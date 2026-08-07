@@ -5,14 +5,29 @@ export function DsPageHeader({
   eyebrow,
   title,
   description,
+  status,
 }: {
   eyebrow?: string;
   title: string;
   description: string;
+  status?: "Done" | "Planned";
 }) {
   return (
     <header className="mb-10 border-b border-line pb-8">
-      {eyebrow && <p className="cp-caption mb-1">{eyebrow}</p>}
+      <div className="mb-1 flex flex-wrap items-center gap-2">
+        {eyebrow && <p className="cp-caption">{eyebrow}</p>}
+        {status && (
+          <span
+            className={`rounded-md px-2 py-0.5 text-xs font-medium ${
+              status === "Done"
+                ? "bg-brand-muted text-brand-ink"
+                : "border border-line bg-surface-elevated text-ink-muted"
+            }`}
+          >
+            {status}
+          </span>
+        )}
+      </div>
       <h1 className="cp-h1">{title}</h1>
       <p className="mt-3 max-w-2xl text-base text-ink-secondary">
         {description}

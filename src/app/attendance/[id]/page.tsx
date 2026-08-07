@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import MainLayout from "@/components/layout/MainLayout";
 import PageHeader from "@/components/ui/PageHeader";
@@ -9,6 +8,9 @@ import ActionButton from "@/components/ui/ActionButton";
 import Snackbar from "@/components/ui/Snackbar";
 import CrepassIcon from "@/components/ui/CrepassIcon";
 import Badge from "@/components/ui/Badge";
+import Avatar from "@/components/ui/Avatar";
+import Select from "@/components/ui/Select";
+import ProgressCircle from "@/components/ui/ProgressCircle";
 import { ClassPeriod, Student, AttendanceStatus } from "@/types";
 import { studentAvatarSrc } from "@/constants/designTokens";
 
@@ -310,19 +312,17 @@ export default function AttendanceDetailPage() {
           </div>
           <ul className="divide-y divide-line">
             {mockStudents.map((student, index) => {
-              const src = student.avatar ?? studentAvatarSrc(student.gender);
               return (
                 <li
                   key={student.id}
                   className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between hover:bg-surface-elevated/60"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <Image
-                      src={src}
+                    <Avatar
+                      src={student.avatar}
+                      gender={student.gender}
                       alt=""
-                      width={40}
-                      height={40}
-                      className="rounded-full border border-line object-cover"
+                      size={40}
                     />
                     <div className="min-w-0">
                       <p className="font-medium text-ink">
@@ -343,38 +343,20 @@ export default function AttendanceDetailPage() {
                       }
                     </Badge>
                   </div>
-                  <div
-                    className="flex flex-wrap gap-1.5"
-                    role="group"
-                    aria-label={`${student.name} 출결`}
-                  >
-                    {(Object.keys(attendanceConfig) as AttendanceStatus[]).map(
-                      (status) => {
-                        const cfg = attendanceConfig[status];
-                        const selected =
-                          attendanceRecords[student.id] === status;
-                        return (
-                          <button
-                            key={status}
-                            type="button"
-                            onClick={() => updateAttendance(student.id, status)}
-                            className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-xs font-medium transition-colors ${
-                              selected ? cfg.selected : cfg.idle
-                            }`}
-                            aria-pressed={selected}
-                          >
-                            {selected && (
-                              <CrepassIcon
-                                name="check"
-                                size={14}
-                                className="mr-0.5 text-inherit"
-                              />
-                            )}
-                            {cfg.label}
-                          </button>
-                        );
-                      },
-                    )}
+                  <div className="w-full sm:w-44">
+                    <Select
+                      aria-label={`${student.name} 출결`}
+                      value={attendanceRecords[student.id] ?? "present"}
+                      onChange={(v) =>
+                        updateAttendance(student.id, v as AttendanceStatus)
+                      }
+                      options={(
+                        Object.keys(attendanceConfig) as AttendanceStatus[]
+                      ).map((status) => ({
+                        value: status,
+                        label: attendanceConfig[status].label,
+                      }))}
+                    />
                   </div>
                 </li>
               );
@@ -382,7 +364,8 @@ export default function AttendanceDetailPage() {
           </ul>
         </section>
 
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex items-center justify-end gap-3">
+          {saving && <ProgressCircle size={28} label="저장 중" />}
           <ActionButton
             variant="brandSolid"
             onClick={saveAttendance}
