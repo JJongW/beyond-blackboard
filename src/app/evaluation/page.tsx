@@ -4,9 +4,14 @@ import MainLayout from "@/components/layout/MainLayout";
 import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
 import CrepassIcon from "@/components/ui/CrepassIcon";
+import Accordion from "@/components/ui/Accordion";
+import Card from "@/components/ui/Card";
+import Divider from "@/components/ui/Divider";
+import ActionButton from "@/components/ui/ActionButton";
+import HelpBubble from "@/components/ui/HelpBubble";
 
 /**
- * 채점 — CrepassIcon 액션 아이콘
+ * 채점 — Accordion FAQ + Card 액션
  */
 export default function EvaluationPage() {
   const inProgress: { id: string; title: string; progress: number }[] = [];
@@ -17,10 +22,13 @@ export default function EvaluationPage() {
         <PageHeader
           title="채점"
           crumbs={[{ label: "홈", href: "/" }, { label: "채점" }]}
+          actions={
+            <HelpBubble content="답안지를 올린 뒤 루브릭 기준으로 채점합니다." />
+          }
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <section className="cp-card">
+          <Card as="section">
             <div className="mb-4 flex items-center gap-3 text-ink">
               <CrepassIcon name="add" size={22} weight="fill" />
               <h2 className="cp-h3">새 채점</h2>
@@ -29,19 +37,24 @@ export default function EvaluationPage() {
               답안지를 올리고 채점을 시작합니다.
             </p>
             <div className="space-y-2">
-              <Link href="/evaluation/new" className="cp-btn-primary w-full">
+              <ActionButton
+                variant="brandSolid"
+                width="fill"
+                href="/evaluation/new"
+              >
                 답안지 업로드
-              </Link>
-              <Link
+              </ActionButton>
+              <ActionButton
+                variant="neutralWeak"
+                width="fill"
                 href="/evaluation/rubric"
-                className="cp-btn-secondary w-full"
               >
                 채점 기준 설정
-              </Link>
+              </ActionButton>
             </div>
-          </section>
+          </Card>
 
-          <section className="cp-card">
+          <Card as="section">
             <div className="mb-4 flex items-center gap-3 text-ink">
               <CrepassIcon name="calendar" size={22} weight="fill" />
               <h2 className="cp-h3">진행 중</h2>
@@ -63,8 +76,10 @@ export default function EvaluationPage() {
                 ))}
               </ul>
             )}
-          </section>
+          </Card>
         </div>
+
+        <Divider label="최근" className="mb-6" />
 
         <section>
           <h2 className="cp-h2 mb-4">최근 채점</h2>
@@ -77,10 +92,40 @@ export default function EvaluationPage() {
           />
         </section>
 
-        <p className="mt-8 flex items-center gap-2 cp-caption">
-          <CrepassIcon name="clipboard" size={18} />
-          채점 결과는 추후 학생·성적 메뉴와 연결될 예정입니다.
-        </p>
+        <Divider label="도움말" className="my-8" />
+
+        <section>
+          <h2 className="cp-h2 mb-4">자주 묻는 질문</h2>
+          <Accordion
+            exclusive
+            items={[
+              {
+                id: "upload",
+                title: "어떤 파일을 올릴 수 있나요?",
+                defaultOpen: true,
+                content:
+                  "이미지·PDF 답안지를 지원할 예정입니다. 지금은 UI 미리보기입니다.",
+              },
+              {
+                id: "rubric",
+                title: "채점 기준은 어디서 만드나요?",
+                content: (
+                  <p>
+                    <Link href="/evaluation/rubric" className="cp-link">
+                      채점 기준 설정
+                    </Link>
+                    에서 루브릭을 구성합니다.
+                  </p>
+                ),
+              },
+              {
+                id: "sync",
+                title: "성적·학생 메뉴와 연결되나요?",
+                content: "채점 결과는 추후 학생·성적 메뉴와 연결될 예정입니다.",
+              },
+            ]}
+          />
+        </section>
       </div>
     </MainLayout>
   );

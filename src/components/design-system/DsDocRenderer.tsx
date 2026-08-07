@@ -29,6 +29,14 @@ import {
   DsSelectDemo,
   DsSwitchDemo,
   DsTabsDemo,
+  DsAccordionDemo,
+  DsDividerDemo,
+  DsPageBannerDemo,
+  DsHelpBubbleDemo,
+  DsReactionDemo,
+  DsTagGroupDemo,
+  DsFabDemo,
+  DsCardDemo,
 } from "@/components/design-system/DsInteractiveDemos";
 import {
   DsDoDont,
@@ -272,6 +280,20 @@ function renderDemo(demo: NonNullable<DsDoc["demo"]>) {
       return <DsListDemo />;
     case "loading":
       return <DsLoadingDemo />;
+    case "accordion":
+      return <DsAccordionDemo />;
+    case "divider":
+      return <DsDividerDemo />;
+    case "page-banner":
+      return <DsPageBannerDemo />;
+    case "help-bubble":
+      return <DsHelpBubbleDemo />;
+    case "reaction":
+      return <DsReactionDemo />;
+    case "tag-group":
+      return <DsTagGroupDemo />;
+    case "fab":
+      return <DsFabDemo />;
     case "badge":
       return (
         <div className="flex flex-wrap items-center gap-3">
@@ -452,22 +474,7 @@ function renderDemo(demo: NonNullable<DsDoc["demo"]>) {
         </div>
       );
     case "card":
-      return (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="cp-card">
-            <p className="cp-h3">출석 요약</p>
-            <p className="mt-2 text-sm text-ink-secondary">
-              오늘 출석 28 · 결석 1 · 지각 0
-            </p>
-          </div>
-          <div className="cp-card cp-card-raised">
-            <p className="cp-h3">raised 카드</p>
-            <p className="mt-2 text-sm text-ink-secondary">
-              떠 있는 표면이 필요할 때만 사용합니다.
-            </p>
-          </div>
-        </div>
-      );
+      return <DsCardDemo />;
     default:
       return null;
   }

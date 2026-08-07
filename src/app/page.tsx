@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import MainLayout from "@/components/layout/MainLayout";
 import CrepassIcon from "@/components/ui/CrepassIcon";
 import Callout from "@/components/ui/Callout";
@@ -11,12 +12,17 @@ import Tabs from "@/components/ui/Tabs";
 import ActionButton from "@/components/ui/ActionButton";
 import Menu, { MenuDotsTrigger } from "@/components/ui/Menu";
 import RadioGroup from "@/components/ui/RadioGroup";
+import PageBanner from "@/components/ui/PageBanner";
+import Divider from "@/components/ui/Divider";
+import HelpBubble from "@/components/ui/HelpBubble";
+import Card from "@/components/ui/Card";
 
 /**
  * 홈 대시보드
  * 변경: 할 일 1순위·소식 압축, 이모지 제거, 카드 shadow 축소, 사이드바 없음
  */
 export default function HomePage() {
+  const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [todos, setTodos] = useState([
     {
@@ -53,6 +59,7 @@ export default function HomePage() {
 
   const [hideCompleted, setHideCompleted] = useState(false);
   const [homeTab, setHomeTab] = useState<"todo" | "news">("todo");
+  const [showBanner, setShowBanner] = useState(true);
 
   const addTodo = () => {
     if (!newTodoText.trim()) return;
@@ -123,22 +130,39 @@ export default function HomePage() {
   return (
     <MainLayout>
       <main className="cp-page">
-        <div className="mb-8">
-          <h1 className="cp-h1">오늘</h1>
-          <p className="mt-1 text-base text-ink-muted">
-            {new Date().toLocaleDateString("ko-KR", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              weekday: "short",
-            })}
-          </p>
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="cp-h1">오늘</h1>
+            <p className="mt-1 text-base text-ink-muted">
+              {new Date().toLocaleDateString("ko-KR", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                weekday: "short",
+              })}
+            </p>
+          </div>
+          <HelpBubble content="할 일은 Checkbox로 완료하고, Tabs로 소식과 전환합니다." />
         </div>
 
-        <Callout tone="informative" icon="clipboard" className="mb-8">
-          우선순위 높은 할 일부터 처리하세요. Brand 버튼은 화면당 핵심 행동
-          하나에만 씁니다.
+        {showBanner && (
+          <PageBanner
+            className="mb-6"
+            title="수행평가 마감이 다가옵니다"
+            description="우선순위 높은 할 일부터 처리하세요."
+            tone="informative"
+            icon="clipboard"
+            actionLabel="채점으로 이동"
+            onAction={() => router.push("/evaluation")}
+            onDismiss={() => setShowBanner(false)}
+          />
+        )}
+
+        <Callout tone="neutral" icon="help" className="mb-8" hideIcon>
+          Brand 버튼은 화면당 핵심 행동 하나에만 씁니다.
         </Callout>
+
+        <Divider label="오늘의 업무" className="mb-6" />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <section
@@ -319,8 +343,8 @@ export default function HomePage() {
             )}
           </section>
 
-          {/* 달력 — PLACEHOLDER_CAL */}
-          <section className="cp-card" aria-labelledby="cal-heading">
+          {/* 달력 */}
+          <Card as="section" aria-labelledby="cal-heading">
             <h2 id="cal-heading" className="cp-h3 mb-4">
               달력
             </h2>
@@ -375,7 +399,7 @@ export default function HomePage() {
                 );
               })}
             </div>
-          </section>
+          </Card>
         </div>
       </main>
     </MainLayout>

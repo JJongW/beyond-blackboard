@@ -5,14 +5,17 @@ import MainLayout from "@/components/layout/MainLayout";
 import PageHeader from "@/components/ui/PageHeader";
 import CrepassIcon from "@/components/ui/CrepassIcon";
 import Chip from "@/components/ui/Chip";
-import Badge from "@/components/ui/Badge";
 import Callout from "@/components/ui/Callout";
 import EmptyState from "@/components/ui/EmptyState";
-import ActionButton from "@/components/ui/ActionButton";
 import Avatar from "@/components/ui/Avatar";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import List, { ListItem } from "@/components/ui/List";
 import { AlertDialog } from "@/components/ui/Dialog";
+import ReactionButton from "@/components/ui/ReactionButton";
+import TagGroup from "@/components/ui/TagGroup";
+import FloatingActionButton from "@/components/ui/FloatingActionButton";
+import HelpBubble from "@/components/ui/HelpBubble";
+import Card from "@/components/ui/Card";
 import { Student } from "@/types";
 import { studentAvatarSrc } from "@/constants/designTokens";
 
@@ -101,15 +104,7 @@ export default function StudentsPage() {
           description={`${filteredStudents.length}명`}
           crumbs={[{ label: "홈", href: "/" }, { label: "학생" }]}
           actions={
-            <ActionButton
-              variant="brandSolid"
-              onClick={() => setShowAddModal(true)}
-              prefixIcon={
-                <CrepassIcon name="add" size={18} className="text-white" />
-              }
-            >
-              학생 등록
-            </ActionButton>
+            <HelpBubble content="학년 Chip으로 필터하고, 별표로 즐겨찾기를 표시합니다." />
           }
         />
 
@@ -180,7 +175,7 @@ export default function StudentsPage() {
         ) : viewMode === "card" ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredStudents.map((student) => (
-              <article key={student.id} className="cp-card !p-5">
+              <Card key={student.id} as="article" className="!p-5">
                 <div className="mb-4 flex items-center justify-between">
                   <Avatar
                     src={student.avatar}
@@ -188,34 +183,17 @@ export default function StudentsPage() {
                     alt=""
                     size={48}
                   />
-                  <button
-                    type="button"
-                    onClick={() => toggleFavorite(student.id)}
-                    aria-label={
-                      student.isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가"
-                    }
-                    className={`inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-surface-elevated ${
-                      student.isFavorite ? "text-brand" : "text-ink-muted"
-                    }`}
-                  >
-                    <CrepassIcon
-                      name={student.isFavorite ? "star" : "star-outline"}
-                      size={22}
-                    />
-                  </button>
+                  <ReactionButton
+                    pressed={!!student.isFavorite}
+                    onChange={() => toggleFavorite(student.id)}
+                  />
                 </div>
                 <h2 className="cp-h3">{student.name}</h2>
                 <p className="mt-1 text-sm text-ink-muted">
                   {student.class} · {student.studentNumber}
                 </p>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {student.tags.map((tag) => (
-                    <Badge key={tag} tone="neutral">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </article>
+                <TagGroup tags={student.tags} className="mt-3" />
+              </Card>
             ))}
           </div>
         ) : (
@@ -235,32 +213,27 @@ export default function StudentsPage() {
                 description={`${student.class} · ${student.studentNumber}`}
                 trailing={
                   <div className="flex items-center gap-2">
-                    <div className="hidden flex-wrap gap-1 sm:flex">
-                      {student.tags.slice(0, 2).map((tag) => (
-                        <Badge key={tag}>{tag}</Badge>
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => toggleFavorite(student.id)}
-                      aria-label={
-                        student.isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가"
-                      }
-                      className={`inline-flex h-9 w-9 items-center justify-center rounded-md ${
-                        student.isFavorite ? "text-brand" : "text-ink-muted"
-                      }`}
-                    >
-                      <CrepassIcon
-                        name={student.isFavorite ? "star" : "star-outline"}
-                        size={20}
-                      />
-                    </button>
+                    <TagGroup
+                      tags={student.tags}
+                      max={2}
+                      className="hidden sm:flex"
+                    />
+                    <ReactionButton
+                      pressed={!!student.isFavorite}
+                      onChange={() => toggleFavorite(student.id)}
+                      size={20}
+                    />
                   </div>
                 }
               />
             ))}
           </List>
         )}
+
+        <FloatingActionButton
+          label="학생 등록"
+          onClick={() => setShowAddModal(true)}
+        />
 
         <AlertDialog
           open={showAddModal}

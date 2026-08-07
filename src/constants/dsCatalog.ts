@@ -79,6 +79,13 @@ export type DsDoc = {
     | "spacing"
     | "elevation"
     | "motion"
+    | "accordion"
+    | "divider"
+    | "page-banner"
+    | "help-bubble"
+    | "reaction"
+    | "tag-group"
+    | "fab"
     | "card";
 };
 
@@ -554,6 +561,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
+    demo: "accordion",
     related: [
       {
         title: "Color",
@@ -1291,6 +1299,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
+    demo: "divider",
     related: [
       {
         title: "Color",
@@ -1396,6 +1405,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
+    demo: "fab",
     related: [
       {
         title: "Color",
@@ -1500,6 +1510,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
+    demo: "help-bubble",
     related: [
       {
         title: "Color",
@@ -1919,6 +1930,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
+    demo: "page-banner",
     related: [
       {
         title: "Color",
@@ -2129,6 +2141,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
+    demo: "reaction",
     related: [
       {
         title: "Color",
@@ -2812,6 +2825,7 @@ export const DS_COMPONENTS: DsDoc[] = [
     ],
     dos: ["역할에 맞는 컴포넌트 선택", "토큰·CrepassIcon 사용"],
     donts: ["한 줄에 primary 남발", "Karrot/Seed 원색 그대로 붙이기"],
+    demo: "tag-group",
     related: [
       {
         title: "Color",

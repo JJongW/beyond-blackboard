@@ -269,12 +269,18 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ template, className }) => {
 - [x] `SegmentedControl`, `List`, `Avatar`
 - [x] `students` 세그먼트·모달 교체, `records` 필터 통일, Header 알림 패널 정리
 
-### Phase 1 밖 → Phase 2
+### Phase 2
 
 - [x] Checkbox · Radio · Switch · Select · Tabs · Menu
 - [x] ProgressCircle + Loading 패턴 실연결
 - [x] 카탈로그 Status(`Done`/`Planned`) 일괄 정리 — Planned은 가짜 Preview 없음
 - [x] 홈(`/`) · 출결 상세 · Header에 연결
+
+### Phase 3
+
+- [x] Accordion · Divider · PageBanner · HelpBubble · ReactionButton · TagGroup · FAB · Card
+- [x] Top/Side Navigation 기존 셸을 Done으로 표시
+- [x] 홈 · 학생 · 채점 · 문서 연결
 
 ### 검증
 
