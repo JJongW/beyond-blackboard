@@ -16,19 +16,9 @@ import QuantityPicker from "@/components/ui/QuantityPicker";
 import SidePanel from "@/components/ui/SidePanel";
 import ScrollFog from "@/components/ui/ScrollFog";
 import IdentityPlaceholder from "@/components/ui/IdentityPlaceholder";
-import { ClassPeriod, Student, AttendanceStatus } from "@/types";
+import { Student, AttendanceStatus } from "@/types";
 import { studentAvatarSrc } from "@/constants/designTokens";
-
-const mockClassPeriod: ClassPeriod = {
-  id: "1",
-  subject: "수학",
-  period: 1,
-  date: "2024-08-15",
-  startTime: "09:00",
-  endTime: "09:50",
-  attendanceCount: 28,
-  totalStudents: 30,
-};
+import { formatKoDate, getMockClassPeriod } from "@/constants/attendanceMock";
 
 const mockStudents: Student[] = [
   {
@@ -193,6 +183,8 @@ export default function AttendanceDetailPage() {
   const params = useParams();
   const periodId = typeof params.id === "string" ? params.id : "1";
   const router = useRouter();
+  // 목록과 동일 소스 — 오늘 날짜·교시 메타 동기화
+  const mockClassPeriod = getMockClassPeriod(periodId);
   const [saving, setSaving] = useState(false);
   const [startTime, setStartTime] = useState(mockClassPeriod.startTime);
   const [endTime, setEndTime] = useState(mockClassPeriod.endTime);
@@ -266,7 +258,7 @@ export default function AttendanceDetailPage() {
       <main className="cp-page">
         <PageHeader
           title={`${mockClassPeriod.subject} ${mockClassPeriod.period}교시`}
-          description={`${mockClassPeriod.startTime}–${mockClassPeriod.endTime} · ${new Date(mockClassPeriod.date).toLocaleDateString("ko-KR")}`}
+          description={`${mockClassPeriod.startTime}–${mockClassPeriod.endTime} · ${formatKoDate(mockClassPeriod.date)}`}
           crumbs={[
             { label: "홈", href: "/" },
             { label: "출결", href: "/attendance" },
@@ -345,6 +337,11 @@ export default function AttendanceDetailPage() {
                       type="button"
                       className="flex min-w-0 items-center gap-3 text-left"
                       onClick={() => setPanelStudent(student)}
+                      aria-label={`${index + 1}번 ${student.name}, ${student.studentNumber} · ${student.class}, ${
+                        attendanceConfig[
+                          attendanceRecords[student.id] ?? "present"
+                        ].label
+                      }`}
                     >
                       {student.avatar ? (
                         <Avatar
@@ -357,17 +354,26 @@ export default function AttendanceDetailPage() {
                         <IdentityPlaceholder label={student.name} size={40} />
                       )}
                       <div className="min-w-0">
+                        {/*
+                          번호와 이름 사이 시각·음성 구분.
+                          이전: mr-2만 있어 a11y 이름이 "1김민준"으로 붙음 → "1. 김민준"으로 분리
+                        */}
                         <p className="font-medium text-ink">
-                          <span className="mr-2 text-ink-subtle">
-                            {index + 1}
+                          <span className="mr-1.5 tabular-nums text-ink-subtle">
+                            {index + 1}.
                           </span>
+                          {/* 공백 문자로 DOM/복사 시에도 "1. 김민준" 유지 (CSS margin만으로는 textContent가 붙음) */}{" "}
                           {student.name}
                         </p>
                         <p className="text-sm text-ink-muted">
                           {student.studentNumber} · {student.class}
                         </p>
                       </div>
-                      <Badge tone="neutral" className="hidden sm:inline-flex">
+                      <Badge
+                        tone="neutral"
+                        className="hidden sm:inline-flex"
+                        aria-hidden="true"
+                      >
                         {
                           attendanceConfig[
                             attendanceRecords[student.id] ?? "present"

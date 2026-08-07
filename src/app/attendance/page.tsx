@@ -8,39 +8,11 @@ import CrepassIcon from "@/components/ui/CrepassIcon";
 import Badge from "@/components/ui/Badge";
 import PageHeader from "@/components/ui/PageHeader";
 import { ClassPeriod } from "@/types";
-
-const mockClassPeriods: ClassPeriod[] = [
-  {
-    id: "1",
-    subject: "수학",
-    period: 1,
-    date: "2024-08-15",
-    startTime: "09:00",
-    endTime: "09:50",
-    attendanceCount: 28,
-    totalStudents: 30,
-  },
-  {
-    id: "2",
-    subject: "국어",
-    period: 2,
-    date: "2024-08-15",
-    startTime: "10:00",
-    endTime: "10:50",
-    attendanceCount: 29,
-    totalStudents: 30,
-  },
-  {
-    id: "3",
-    subject: "영어",
-    period: 3,
-    date: "2024-08-15",
-    startTime: "11:00",
-    endTime: "11:50",
-    attendanceCount: 27,
-    totalStudents: 30,
-  },
-];
+import {
+  getMockClassPeriods,
+  parseISODateLocal,
+  todayISODate,
+} from "@/constants/attendanceMock";
 
 function statusLabel(period: ClassPeriod) {
   if (period.attendanceCount === period.totalStudents) return "완료";
@@ -48,13 +20,25 @@ function statusLabel(period: ClassPeriod) {
   return "미완료";
 }
 
+function toISODate(date: Date) {
+  return todayISODate(date);
+}
+
 /**
  * 출결 목록 — FA 제거, EmptyState, 토큰 카드
+ * 날짜: 데모 교시와 동일한 로컬 오늘을 기준으로 맞춤 (상세 페이지와 동기)
  */
 export default function AttendancePage() {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [classPeriods] = useState<ClassPeriod[]>(mockClassPeriods);
+  // mock 교시 날짜와 동일한 오늘로 초기화 — 헤더·카드·상세가 어긋나지 않게
+  const [currentDate, setCurrentDate] = useState(() =>
+    parseISODateLocal(todayISODate()),
+  );
+  const [classPeriods] = useState<ClassPeriod[]>(() => getMockClassPeriods());
   const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const selectedISO = toISODate(currentDate);
+  // 선택한 날짜의 교시만 표시 (다른 날은 EmptyState)
+  const visiblePeriods = classPeriods.filter((p) => p.date === selectedISO);
 
   const navigateDate = (direction: "prev" | "next") => {
     const next = new Date(currentDate);
@@ -115,7 +99,7 @@ export default function AttendancePage() {
           </div>
         </div>
 
-        {classPeriods.length > 0 ? (
+        {visiblePeriods.length > 0 ? (
           <section>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="cp-h2">오늘의 수업</h2>
@@ -130,7 +114,7 @@ export default function AttendancePage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {classPeriods.map((period) => (
+              {visiblePeriods.map((period) => (
                 <Link
                   key={period.id}
                   href={`/attendance/${period.id}`}
