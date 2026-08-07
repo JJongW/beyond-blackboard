@@ -1,105 +1,239 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { NAVIGATION_ITEMS } from '@/constants';
-import { User } from '@/types';
-import MobileMenu from './MobileMenu';
+import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { NAVIGATION_ITEMS, NOTICES } from "@/constants";
+import { BRAND } from "@/constants/designTokens";
+import { NAV_ICON_BY_HREF } from "@/constants/designSystemNav";
+import { User } from "@/types";
+import CrepassIcon from "@/components/ui/CrepassIcon";
+import { NotificationBadge } from "@/components/ui/Badge";
+import MobileMenu from "./MobileMenu";
 
 interface HeaderProps {
   user?: User;
 }
 
 /**
- * 상단 네비게이션 바 컴포넌트
- * 
- * 기능:
- * - 로고 및 서비스명 표시
- * - 메인 네비게이션 메뉴
- * - 사용자 정보 및 알림
- * - 반응형 디자인 지원
- * 
- * @param user - 현재 로그인한 사용자 정보
+ * 헤더 — Seed Top Navigation = Line 아이콘 (배경 네모 없음)
  */
 const Header: React.FC<HeaderProps> = ({ user }) => {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isUserOpen, setIsUserOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const userRef = useRef<HTMLDivElement>(null);
 
-  // 기본 사용자 정보 (개발용)
   const defaultUser: User = {
-    id: '1',
-    name: '김민준',
-    email: 'teacher@school.edu',
-    role: 'teacher',
-    school: '서울초등학교',
-    avatar: 'https://placehold.co/100x100/1ccf60/ffffff?text=교',
+    id: "1",
+    name: "김민준",
+    email: "teacher@school.edu",
+    role: "teacher",
+    school: "서울초등학교",
   };
 
   const currentUser = user || defaultUser;
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+  useEffect(() => {
+    const onPointerDown = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (notifRef.current && !notifRef.current.contains(target)) {
+        setIsNotifOpen(false);
+      }
+      if (userRef.current && !userRef.current.contains(target)) {
+        setIsUserOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, []);
 
   return (
-    <header className="bg-white/95 backdrop-blur-sm border-b border-gray-200 w-full flex-shrink-0 fixed top-0 left-0 right-0 z-50 shadow-sm">
-      <div className="mx-auto px-6">
-        <div className="flex justify-between items-center h-16">
-          {/* 로고 및 메뉴 */}
-          <div className="flex items-center space-x-8">
-            {/* 로고 */}
-            <Link href="/" className="flex items-center hover:opacity-80 transition-opacity cursor-pointer">
-              <img 
-                src="/images/pencil-logo.png" 
-                alt="로고" 
-                className="w-8 h-8 rounded-full mr-2 shadow-sm"
-              />
-              <h1 className="text-lg font-bold">크레파스 - AI도우미</h1>
-            </Link>
-            {/* 네비게이션 메뉴 */}
-            <nav className="hidden md:flex items-center space-x-6">
-              {NAVIGATION_ITEMS.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`text-sm font-semibold ${
-                      isActive
-                        ? 'text-primary-500 border-b-2 border-primary-500 pb-1'
-                        : 'text-gray-600 hover:text-primary-500'
-                    }`}
-                  >
-                    {item.title}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-          {/* 사용자 정보 및 알림 */}
-          <div className="flex items-center space-x-4">
-            <button className="text-gray-500 hover:text-gray-800">
-              <i className="fas fa-bell"></i>
+    <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-line bg-surface-card/95 backdrop-blur-sm">
+      <div className="mx-auto flex h-full items-center justify-between px-4 sm:px-6">
+        <div className="flex items-center gap-6 min-w-0">
+          <Link
+            href="/"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0"
+          >
+            <Image
+              src={BRAND.mark}
+              alt={`${BRAND.name} 로고`}
+              width={32}
+              height={32}
+              className="rounded-lg"
+              priority
+            />
+            <span className="text-base font-semibold tracking-tight text-ink">
+              {BRAND.name}
+            </span>
+          </Link>
+
+          <nav
+            className="hidden lg:flex items-center gap-4"
+            aria-label="주요 메뉴"
+          >
+            {NAVIGATION_ITEMS.map((item) => {
+              const isActive =
+                pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const iconName = NAV_ICON_BY_HREF[item.href];
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={
+                    isActive
+                      ? "cp-link-active inline-flex items-center gap-1.5 text-base whitespace-nowrap"
+                      : "cp-link inline-flex items-center gap-1.5 text-base font-medium whitespace-nowrap"
+                  }
+                >
+                  {iconName && (
+                    <CrepassIcon
+                      name={iconName}
+                      size={20}
+                      weight="line"
+                      className={isActive ? "text-brand" : "text-ink-muted"}
+                    />
+                  )}
+                  <span>{item.title}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-1 sm:gap-2">
+          <div className="relative" ref={notifRef}>
+            <button
+              type="button"
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-md text-ink-muted hover:bg-surface-elevated hover:text-ink transition-colors"
+              aria-label="알림"
+              aria-expanded={isNotifOpen}
+              onClick={() => {
+                setIsNotifOpen((v) => !v);
+                setIsUserOpen(false);
+              }}
+            >
+              <CrepassIcon name="bell" size={22} />
+              {/* Seed Notification Badge */}
+              <NotificationBadge count={NOTICES.length} />
             </button>
-            <div className="flex items-center">
-              <img
-                className="h-9 w-9 rounded-full object-cover"
-                src="/images/cute-character.svg"
-                alt="User avatar"
-              />
-              <div className="ml-2 hidden md:block">
-                <p className="text-sm font-semibold">{currentUser.name} 선생님</p>
+
+            {isNotifOpen && (
+              <div
+                className="absolute right-0 mt-2 w-80 rounded-md border border-line bg-surface-card shadow-float z-50"
+                role="dialog"
+                aria-label="알림"
+              >
+                <div className="flex items-center justify-between border-b border-line px-4 py-3">
+                  <p className="text-base font-semibold text-ink">알림</p>
+                  <button
+                    type="button"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-muted hover:text-ink"
+                    aria-label="닫기"
+                    onClick={() => setIsNotifOpen(false)}
+                  >
+                    <CrepassIcon name="close" size={18} />
+                  </button>
+                </div>
+                <ul className="max-h-72 overflow-y-auto divide-y divide-line">
+                  {NOTICES.slice(0, 5).map((notice) => (
+                    <li key={notice.id}>
+                      <div className="px-4 py-3">
+                        <p className="text-base font-medium text-ink line-clamp-1">
+                          {notice.isImportant && (
+                            <span className="mr-1.5 text-danger">중요</span>
+                          )}
+                          {notice.title}
+                        </p>
+                        <p className="cp-caption mt-1 line-clamp-2">
+                          {notice.content}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                {NOTICES.length === 0 && (
+                  <p className="px-4 py-8 text-center text-sm text-ink-muted">
+                    새 알림이 없습니다
+                  </p>
+                )}
               </div>
-            </div>
+            )}
           </div>
+
+          <div className="relative hidden sm:block" ref={userRef}>
+            <button
+              type="button"
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-surface-elevated transition-colors"
+              aria-expanded={isUserOpen}
+              aria-haspopup="menu"
+              onClick={() => {
+                setIsUserOpen((v) => !v);
+                setIsNotifOpen(false);
+              }}
+            >
+              <Image
+                src={BRAND.avatar}
+                alt=""
+                width={32}
+                height={32}
+                className="rounded-full border border-line"
+              />
+              <span className="text-base font-medium text-ink hidden md:inline">
+                {currentUser.name}
+              </span>
+            </button>
+
+            {isUserOpen && (
+              <div
+                className="absolute right-0 mt-2 w-56 rounded-md border border-line bg-surface-card shadow-float z-50 py-1"
+                role="menu"
+              >
+                <div className="border-b border-line px-4 py-3">
+                  <p className="text-sm font-medium text-ink">
+                    {currentUser.name} 선생님
+                  </p>
+                  <p className="cp-caption mt-0.5">{currentUser.school}</p>
+                </div>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-ink-secondary hover:bg-surface-elevated"
+                  onClick={() => setIsUserOpen(false)}
+                >
+                  <CrepassIcon name="settings" size={18} />
+                  설정 (준비 중)
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="w-full px-4 py-2.5 text-left text-sm text-ink-secondary hover:bg-surface-elevated"
+                  onClick={() => setIsUserOpen(false)}
+                >
+                  로그아웃 (준비 중)
+                </button>
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-md text-ink-secondary hover:bg-surface-elevated"
+            aria-label="메뉴 열기"
+            onClick={() => setIsMobileMenuOpen(true)}
+          >
+            <CrepassIcon name="menu" size={24} />
+          </button>
         </div>
       </div>
 
-      {/* 모바일 메뉴 */}
-      <MobileMenu 
-        isOpen={isMobileMenuOpen} 
-        onClose={() => setIsMobileMenuOpen(false)} 
+      <MobileMenu
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
       />
     </header>
   );
