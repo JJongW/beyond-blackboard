@@ -10,7 +10,7 @@ export function DsPageHeader({
   eyebrow?: string;
   title: string;
   description: string;
-  status?: "Done" | "Planned";
+  status?: "Done" | "Planned" | "Excluded";
 }) {
   return (
     <header className="mb-10 border-b border-line pb-8">
@@ -21,7 +21,9 @@ export function DsPageHeader({
             className={`rounded-md px-2 py-0.5 text-xs font-medium ${
               status === "Done"
                 ? "bg-brand-muted text-brand-ink"
-                : "border border-line bg-surface-elevated text-ink-muted"
+                : status === "Excluded"
+                  ? "border border-line bg-surface text-ink-subtle"
+                  : "border border-line bg-surface-elevated text-ink-muted"
             }`}
           >
             {status}

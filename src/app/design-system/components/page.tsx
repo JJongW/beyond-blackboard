@@ -30,7 +30,9 @@ export default function ComponentsIndexPage() {
                     className={`shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-medium ${
                       status === "Done"
                         ? "bg-brand-muted text-brand-ink"
-                        : "border border-line text-ink-muted"
+                        : status === "Excluded"
+                          ? "border border-line text-ink-subtle"
+                          : "border border-line text-ink-muted"
                     }`}
                   >
                     {status}

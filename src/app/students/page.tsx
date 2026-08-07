@@ -16,6 +16,9 @@ import TagGroup from "@/components/ui/TagGroup";
 import FloatingActionButton from "@/components/ui/FloatingActionButton";
 import HelpBubble from "@/components/ui/HelpBubble";
 import Card from "@/components/ui/Card";
+import InputButton from "@/components/ui/InputButton";
+import MenuSheet from "@/components/ui/MenuSheet";
+import ImageFrame from "@/components/ui/ImageFrame";
 import { Student } from "@/types";
 import { studentAvatarSrc } from "@/constants/designTokens";
 
@@ -27,6 +30,7 @@ export default function StudentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGrade, setSelectedGrade] = useState<string>("전체");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const [students, setStudents] = useState<Student[]>([
     {
@@ -104,7 +108,16 @@ export default function StudentsPage() {
           description={`${filteredStudents.length}명`}
           crumbs={[{ label: "홈", href: "/" }, { label: "학생" }]}
           actions={
-            <HelpBubble content="학년 Chip으로 필터하고, 별표로 즐겨찾기를 표시합니다." />
+            <div className="flex items-center gap-2">
+              <HelpBubble content="학년 Chip으로 필터하고, 별표로 즐겨찾기를 표시합니다." />
+              <button
+                type="button"
+                className="cp-btn-secondary !py-1.5 !px-3 !text-sm sm:hidden"
+                onClick={() => setSheetOpen(true)}
+              >
+                더보기
+              </button>
+            </div>
           }
         />
 
@@ -118,20 +131,15 @@ export default function StudentsPage() {
         </Callout>
 
         <div className="cp-card mb-6 !p-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-            <div className="relative flex-1">
-              <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-ink-muted">
-                <CrepassIcon name="search" size={20} />
-              </span>
-              <input
-                type="search"
-                placeholder="이름, 학번, 반 검색"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="cp-input pl-10"
-                aria-label="학생 검색"
-              />
-            </div>
+          <div className="flex flex-col gap-4">
+            <InputButton
+              label="학생 검색"
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="이름, 학번, 반"
+              buttonLabel="검색"
+              onSubmit={() => undefined}
+            />
 
             <div
               className="flex flex-wrap gap-2"
@@ -177,12 +185,16 @@ export default function StudentsPage() {
             {filteredStudents.map((student) => (
               <Card key={student.id} as="article" className="!p-5">
                 <div className="mb-4 flex items-center justify-between">
-                  <Avatar
-                    src={student.avatar}
-                    gender={student.gender}
-                    alt=""
-                    size={48}
-                  />
+                  <div className="w-16 overflow-hidden rounded-full">
+                    <ImageFrame
+                      src={student.avatar ?? studentAvatarSrc(student.gender)}
+                      alt=""
+                      width={64}
+                      height={64}
+                      ratio="1/1"
+                      className="!rounded-full"
+                    />
+                  </div>
                   <ReactionButton
                     pressed={!!student.isFavorite}
                     onChange={() => toggleFavorite(student.id)}
@@ -233,6 +245,30 @@ export default function StudentsPage() {
         <FloatingActionButton
           label="학생 등록"
           onClick={() => setShowAddModal(true)}
+        />
+
+        <MenuSheet
+          open={sheetOpen}
+          onClose={() => setSheetOpen(false)}
+          title="학생 메뉴"
+          items={[
+            {
+              id: "add",
+              label: "학생 등록",
+              icon: <CrepassIcon name="add" size={18} />,
+              onSelect: () => setShowAddModal(true),
+            },
+            {
+              id: "card",
+              label: "카드 보기",
+              onSelect: () => setViewMode("card"),
+            },
+            {
+              id: "list",
+              label: "리스트 보기",
+              onSelect: () => setViewMode("list"),
+            },
+          ]}
         />
 
         <AlertDialog
