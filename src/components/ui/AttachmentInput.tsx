@@ -55,7 +55,7 @@ export default function AttachmentInput({
         onClick={() => inputRef.current?.click()}
         className="flex w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed border-line-strong bg-surface px-4 py-8 text-center transition-colors hover:border-brand hover:bg-brand-muted/40 disabled:opacity-50"
       >
-        <CrepassIcon name="add" size={28} className="text-ink-muted" />
+        <CrepassIcon name="add" sizeToken="2xl" className="text-ink-muted" />
         <span className="text-sm font-medium text-ink">파일을 선택하세요</span>
         <span className="text-xs text-ink-muted">{hint}</span>
       </button>

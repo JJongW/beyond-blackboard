@@ -32,9 +32,12 @@ export const COLOR = {
   inkSecondary: "#57574F",
   inkMuted: "#6F6F67",
   inkSubtle: "#9A9A92",
-  surface: "#F6F5F2",
-  surfaceElevated: "#FAF9F6",
-  surfaceCard: "#FBFBFA",
+  /** page canvas — card(#FFF)와 대비를 키워 Soft UI 층 위계 */
+  surface: "#EFEDE8",
+  /** hover · inset · 중간층 */
+  surfaceElevated: "#F7F5F1",
+  /** 카드·헤더 fill — 순백으로 page와 분리 */
+  surfaceCard: "#FFFFFF",
   border: "#E6E5E0",
   borderStrong: "#D2D1CB",
   brand: "#3D8B6E",
@@ -99,7 +102,7 @@ export const ELEVATION = {
   raised: {
     token: "--cp-elevation-raised",
     shadow: "0 1px 2px rgba(31, 31, 29, 0.04)",
-    use: "기본 카드, 입력 그룹 (필요 시 border와 병행)",
+    use: "홈 주요 패널(할 일·달력 등). 리스트 row는 flat 유지",
   },
   floating: {
     token: "--cp-elevation-floating",

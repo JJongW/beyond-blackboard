@@ -8,7 +8,7 @@ import CrepassIcon from "@/components/ui/CrepassIcon";
  */
 const Sidebar: React.FC = () => {
   return (
-    <aside className="hidden h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-auto border-l border-line bg-surface-card p-6 lg:block">
+    <aside className="cp-floating-surface hidden h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-auto border-l border-line p-6 lg:block">
       <div className="cp-card mb-6 !p-0 overflow-hidden">
         <h3 className="border-b border-line px-4 py-3 text-sm font-semibold text-ink">
           공지사항

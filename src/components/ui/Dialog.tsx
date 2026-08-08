@@ -38,7 +38,7 @@ export default function Dialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4"
+      className="cp-scrim fixed inset-0 z-50 flex items-center justify-center p-4"
       role="presentation"
       onClick={onClose}
     >

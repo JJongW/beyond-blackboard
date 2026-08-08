@@ -21,6 +21,7 @@ export const CREPASS_ICON_NAMES = [
   "close",
   "chevron-left",
   "chevron-right",
+  "chevron-down",
   "check",
   "trash",
   "calendar",

@@ -11,7 +11,8 @@ type HelpBubbleProps = {
 };
 
 /**
- * Seed Help Bubble — 짧은 도움말 팝오버 (? 아이콘)
+ * Seed Help Bubble — 터치 44 + inline(18) 글리프 + 팝오버
+ * (이전 28×28은 장식처럼 보임)
  */
 export default function HelpBubble({
   content,
@@ -26,14 +27,16 @@ export default function HelpBubble({
       {label && <span className="text-sm text-ink-secondary">{label}</span>}
       <button
         type="button"
-        className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-muted hover:bg-surface-elevated hover:text-ink"
+        className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-surface-elevated hover:text-ink"
+        style={{ minWidth: 44, minHeight: 44 }}
         aria-label="도움말"
+        title="도움말"
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((v) => !v)}
         onBlur={() => setOpen(false)}
       >
-        <CrepassIcon name="help" size={18} />
+        <CrepassIcon name="help" sizeToken="inline" />
       </button>
       {open && (
         <span

@@ -50,7 +50,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-line bg-surface-card/95 backdrop-blur-sm">
+    <header className="cp-header-bar fixed top-0 left-0 right-0 z-50 h-16 border-b border-line backdrop-blur-sm">
       <div className="mx-auto flex h-full items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-6 min-w-0">
           <Link
@@ -91,7 +91,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
                   {iconName && (
                     <CrepassIcon
                       name={iconName}
-                      size={20}
+                      sizeToken="lg"
                       weight="line"
                       className={isActive ? "text-brand" : "text-ink-muted"}
                     />
@@ -114,13 +114,13 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
                 setIsNotifOpen((v) => !v);
               }}
             >
-              <CrepassIcon name="bell" size={22} />
+              <CrepassIcon name="bell" sizeToken="xl" />
               <NotificationBadge count={NOTICES.length} />
             </button>
 
             {isNotifOpen && (
               <div
-                className="absolute right-0 mt-2 w-80 overflow-hidden rounded-md border border-line bg-surface-card shadow-float z-50"
+                className="absolute right-0 mt-2 w-80 overflow-hidden rounded-md border border-line bg-surface-card shadow-float z-50 cp-floating-surface"
                 role="dialog"
                 aria-label="알림"
               >
@@ -132,7 +132,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
                     aria-label="닫기"
                     onClick={() => setIsNotifOpen(false)}
                   >
-                    <CrepassIcon name="close" size={18} />
+                    <CrepassIcon name="close" sizeToken="inline" />
                   </button>
                 </div>
                 {NOTICES.length === 0 ? (
@@ -170,13 +170,19 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
                   <span className="text-base font-medium text-ink hidden md:inline">
                     {currentUser.name}
                   </span>
+                  {/* 메뉴임을 드러내는 chevron — 프로필 라벨처럼 보이던 문제 */}
+                  <CrepassIcon
+                    name="chevron-down"
+                    sizeToken="sm"
+                    className="text-ink-muted hidden md:inline"
+                  />
                 </span>
               }
               items={[
                 {
                   id: "settings",
                   label: "설정 (준비 중)",
-                  icon: <CrepassIcon name="settings" size={18} />,
+                  icon: <CrepassIcon name="settings" sizeToken="inline" />,
                 },
                 {
                   id: "logout",

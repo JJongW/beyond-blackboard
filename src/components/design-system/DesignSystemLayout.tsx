@@ -75,7 +75,8 @@ export default function DesignSystemLayout({
 
   return (
     <div className="ds-shell min-h-screen text-ink">
-      <header className="sticky top-0 z-40 border-b border-line bg-surface-card/90 backdrop-blur-md">
+      {/* /90 opacity는 RGB 채널 없으면 투명 — solid card + blur */}
+      <header className="cp-header-bar sticky top-0 z-40 border-b border-line backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <button
@@ -124,12 +125,12 @@ export default function DesignSystemLayout({
       {mobileOpen && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-ink/40 lg:hidden"
+            className="cp-scrim fixed inset-0 z-40 lg:hidden"
             onClick={() => setMobileOpen(false)}
             aria-hidden
           />
           <aside
-            className="fixed inset-y-0 left-0 z-50 w-72 overflow-y-auto bg-surface-card p-5 shadow-float lg:hidden"
+            className="cp-floating-surface fixed inset-y-0 left-0 z-50 w-72 overflow-y-auto p-5 shadow-float lg:hidden"
             role="dialog"
             aria-modal
             aria-label="문서 메뉴"
@@ -151,7 +152,8 @@ export default function DesignSystemLayout({
       )}
 
       <div className="mx-auto flex max-w-7xl gap-0 px-4 sm:px-6 lg:gap-12">
-        <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-60 shrink-0 overflow-y-auto py-8 lg:block">
+        {/* 문서 사이드바 — fill 없으면 그라데이션 셸이 비쳐 투명처럼 보임 */}
+        <aside className="cp-floating-surface sticky top-14 hidden h-[calc(100vh-3.5rem)] w-60 shrink-0 overflow-y-auto border-r border-line py-8 pr-4 lg:block">
           <NavTree />
         </aside>
         <main className="min-w-0 flex-1 py-8 pb-24">{children}</main>

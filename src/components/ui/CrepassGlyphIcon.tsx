@@ -13,11 +13,19 @@ import type { CrepassIconName } from "@/constants/designSystemNav";
 
 export type IconWeight = "line" | "fill";
 
-/** Seed 권장 사이즈 토큰 */
+/**
+ * Seed 권장 사이즈 토큰
+ * - 기본 단독 글리프: 2xl(24) + IconButton 44
+ * - 인라인 액션/닫기: inline(18)
+ * - chevron: xl(22) 허용
+ * - 28px 금지 (스케일 상한 24)
+ */
 export const ICON_SIZE = {
   xs: 12,
   sm: 14,
   md: 16,
+  /** 인라인 액션 · 닫기 · Help 글리프 */
+  inline: 18,
   lg: 20,
   xl: 22,
   "2xl": 24,
@@ -221,6 +229,8 @@ function paths(name: CrepassIconName, weight: IconWeight): ReactNode {
       return <path d="M14.5 6L9 12l5.5 6" {...line} />;
     case "chevron-right":
       return <path d="M9.5 6L15 12l-5.5 6" {...line} />;
+    case "chevron-down":
+      return <path d="M6 9.5L12 15l6-5.5" {...line} />;
     case "add":
       return (
         <path
