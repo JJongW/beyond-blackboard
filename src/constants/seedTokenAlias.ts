@@ -55,6 +55,7 @@ export const SEED_COLOR_ROLE = {
   "fg.critical": COLOR.danger,
   "fg.warning": COLOR.warning,
   "bg.layerDefault": COLOR.surface,
+  "bg.layerElevated": COLOR.surfaceElevated,
   "bg.layerFill": COLOR.surfaceCard,
   "bg.brandWeak": COLOR.brandMuted,
   "stroke.neutralMuted": COLOR.border,

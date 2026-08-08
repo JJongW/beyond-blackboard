@@ -40,13 +40,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
   return (
     <>
       <div
-        className="fixed inset-0 z-40 bg-ink/40 md:hidden"
+        className="cp-scrim fixed inset-0 z-40 md:hidden"
         onClick={onClose}
         aria-hidden="true"
       />
 
       <div
-        className="fixed top-0 left-0 z-50 flex h-full w-80 flex-col bg-surface-card shadow-float md:hidden"
+        className="cp-floating-surface fixed top-0 left-0 z-50 flex h-full w-80 flex-col shadow-float md:hidden"
         role="dialog"
         aria-modal="true"
         aria-label="메뉴"

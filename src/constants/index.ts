@@ -134,7 +134,7 @@ export const COLORS = {
   primaryLight: "#559f7d",
   primaryDark: "#2f6f57",
   background: "#fbfbfa",
-  backgroundLight: "#f6f5f2",
+  backgroundLight: "#efede8",
   text: "#1f1f1d",
   textLight: "#6f6f67",
   border: "#e6e5e0",

@@ -38,7 +38,7 @@ export default function SidePanel({
     <div className="fixed inset-0 z-50 flex">
       <button
         type="button"
-        className="absolute inset-0 bg-ink/40"
+        className="cp-scrim absolute inset-0"
         aria-label="닫기"
         onClick={onClose}
       />
@@ -46,7 +46,7 @@ export default function SidePanel({
         role="dialog"
         aria-modal
         aria-labelledby="cp-side-panel-title"
-        className={`relative z-10 flex h-full w-full max-w-md flex-col border-line bg-surface-card shadow-float ${
+        className={`relative z-10 flex h-full w-full max-w-md flex-col border-line bg-surface-card shadow-float cp-floating-surface ${
           side === "right" ? "ml-auto border-l" : "mr-auto border-r"
         } ${className}`}
       >

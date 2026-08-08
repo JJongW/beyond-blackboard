@@ -11,9 +11,10 @@
   --cp-ink-secondary: #57574f;
   --cp-ink-muted: #6f6f67;
   --cp-ink-subtle: #9a9a92;
-  --cp-surface: #f6f5f2;
-  --cp-surface-elevated: #faf9f6;
-  --cp-surface-card: #fbfbfa;
+  /* page → elevated → card(#fff) Soft UI 위계 (Grill 2026-08) */
+  --cp-surface: #efede8;
+  --cp-surface-elevated: #f7f5f1;
+  --cp-surface-card: #ffffff;
   --cp-border: #e6e5e0;
   --cp-border-strong: #d2d1cb;
   --cp-brand: #3d8b6e;
@@ -23,6 +24,26 @@
   --cp-danger: #b42318;
   --cp-warning: #9a6700;
   --cp-focus: #3d8b6e;
+
+  /*
+   * RGB 채널 — Tailwind opacity 수정자(bg-ink/40, bg-surface-card/95)용.
+   * var(--cp-*)만 쓰면 /opacity 가 전부 렌더됨.
+   */
+  --cp-ink-rgb: 31 31 29;
+  --cp-ink-secondary-rgb: 87 87 79;
+  --cp-ink-muted-rgb: 111 111 103;
+  --cp-ink-subtle-rgb: 154 154 146;
+  --cp-surface-rgb: 239 237 232;
+  --cp-surface-elevated-rgb: 247 245 241;
+  --cp-surface-card-rgb: 255 255 255;
+  --cp-border-rgb: 230 229 224;
+  --cp-border-strong-rgb: 210 209 203;
+  --cp-brand-rgb: 61 139 110;
+  --cp-brand-hover-rgb: 47 111 87;
+  --cp-brand-muted-rgb: 230 240 234;
+  --cp-brand-ink-rgb: 30 77 58;
+  --cp-danger-rgb: 180 35 24;
+  --cp-warning-rgb: 154 103 0;
 
   /* Spacing */
   --cp-space-1: 0.25rem;
@@ -73,10 +94,11 @@
   --seed-radius-r3: var(--cp-radius-lg);
   --seed-color-fg-neutral: var(--cp-ink);
   --seed-color-bg-layer-default: var(--cp-surface);
+  --seed-color-bg-layer-fill: var(--cp-surface-card);
   --seed-color-bg-brand-solid: var(--cp-brand);
   --seed-color-stroke-neutral-muted: var(--cp-border);
 
-  --background: 40 14% 96%;
+  --background: 40 12% 92%;
   --foreground: 60 3% 12%;
   --muted: 40 10% 94%;
   --muted-foreground: 50 4% 42%;
@@ -151,6 +173,19 @@
 
   .cp-card-raised {
     box-shadow: var(--cp-elevation-raised);
+  }
+
+  /* 헤더/플로팅 셸 — Tailwind /opacity 수정자 대신 불투명 fill (투명 버그 방지) */
+  .cp-header-bar {
+    background-color: var(--cp-surface-card);
+  }
+
+  .cp-floating-surface {
+    background-color: var(--cp-surface-card);
+  }
+
+  .cp-scrim {
+    background-color: rgba(31, 31, 29, 0.4);
   }
 
   .cp-panel-floating {
@@ -294,7 +329,7 @@
 
   .ds-hero {
     background:
-      linear-gradient(135deg, rgba(230, 240, 234, 0.65) 0%, rgba(251, 251, 250, 0.95) 48%, rgba(250, 249, 246, 1) 100%);
+      linear-gradient(135deg, rgba(230, 240, 234, 0.65) 0%, rgba(255, 255, 255, 0.95) 48%, rgba(247, 245, 241, 1) 100%);
   }
 
   .ds-crayon-rail {

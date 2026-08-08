@@ -159,9 +159,9 @@ export default function AttendancePage() {
         )}
 
         {showCreateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4">
+          <div className="cp-scrim fixed inset-0 z-50 flex items-center justify-center px-4">
             <div
-              className="w-full max-w-md rounded-md border border-line bg-surface-card p-6 shadow-float"
+              className="cp-floating-surface w-full max-w-md rounded-md border border-line p-6 shadow-float"
               role="dialog"
               aria-modal="true"
               aria-labelledby="create-period-title"

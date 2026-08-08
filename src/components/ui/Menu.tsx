@@ -70,7 +70,7 @@ export default function Menu({
         <ul
           id={menuId}
           role="menu"
-          className={`absolute top-full z-50 mt-1.5 min-w-[12rem] rounded-md border border-line bg-surface-card py-1 shadow-float ${
+          className={`absolute top-full z-50 mt-1.5 min-w-[12rem] rounded-md border border-line bg-surface-card py-1 shadow-float cp-floating-surface ${
             align === "end" ? "right-0" : "left-0"
           }`}
         >
@@ -101,11 +101,11 @@ export default function Menu({
   );
 }
 
-/** 아이콘 트리거용 기본 점 세 개 */
+/** 아이콘 트리거용 기본 점 세 개 — 항상 보이도록 (hover-only 제거) */
 export function MenuDotsTrigger() {
   return (
-    <span className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink-muted hover:bg-surface-elevated hover:text-ink">
-      <CrepassIcon name="menu" size={20} />
+    <span className="inline-flex h-10 w-10 items-center justify-center rounded-md text-ink-muted hover:bg-surface-elevated hover:text-ink">
+      <CrepassIcon name="menu" sizeToken="lg" />
     </span>
   );
 }

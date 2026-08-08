@@ -57,7 +57,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
         </div>
 
         {template.isComingSoon && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-md bg-surface-card/90">
+          <div className="absolute inset-0 flex items-center justify-center rounded-md bg-surface-card cp-floating-surface">
             <span className="cp-chip border border-line text-ink-muted bg-surface">
               준비 중
             </span>

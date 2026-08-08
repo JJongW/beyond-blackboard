@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import MainLayout from "@/components/layout/MainLayout";
-import CrepassIcon from "@/components/ui/CrepassIcon";
+import CrepassIcon, { IconButton } from "@/components/ui/CrepassIcon";
 import Callout from "@/components/ui/Callout";
 import Badge from "@/components/ui/Badge";
 import Checkbox from "@/components/ui/Checkbox";
@@ -147,7 +147,7 @@ export default function HomePage() {
 
         {showBanner && (
           <PageBanner
-            className="mb-6"
+            className="mb-6 shadow-raised"
             title="수행평가 마감이 다가옵니다"
             description="우선순위 높은 할 일부터 처리하세요."
             tone="informative"
@@ -179,14 +179,13 @@ export default function HomePage() {
                   onChange={setHideCompleted}
                   label="완료 숨기기"
                 />
-                <button
-                  type="button"
+                <IconButton
+                  label="할 일 추가"
+                  size={44}
                   onClick={() => setIsAddingTodo(true)}
-                  className="inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-md hover:opacity-90 transition-opacity"
-                  aria-label="할 일 추가"
                 >
-                  <CrepassIcon name="add" size={28} />
-                </button>
+                  <CrepassIcon name="add" sizeToken="2xl" />
+                </IconButton>
               </div>
             </div>
 
@@ -201,7 +200,7 @@ export default function HomePage() {
             />
 
             {homeTab === "todo" ? (
-              <div className="cp-card !p-4">
+              <div className="cp-card cp-card-raised !p-4">
                 {isAddingTodo && (
                   <div className="mb-4 space-y-3 rounded-md border border-dashed border-line-strong bg-surface p-4">
                     <label className="sr-only" htmlFor="new-todo">
@@ -296,14 +295,13 @@ export default function HomePage() {
 
                       <Menu
                         aria-label={`${todo.text} 메뉴`}
-                        className="opacity-0 group-hover:opacity-100"
                         trigger={<MenuDotsTrigger />}
                         items={[
                           {
                             id: "del",
                             label: "삭제",
                             destructive: true,
-                            icon: <CrepassIcon name="trash" size={16} />,
+                            icon: <CrepassIcon name="trash" sizeToken="md" />,
                             onSelect: () =>
                               setTodos(todos.filter((t) => t.id !== todo.id)),
                           },
@@ -321,7 +319,7 @@ export default function HomePage() {
               </div>
             ) : (
               <div>
-                <ul className="cp-card !p-0 divide-y divide-line">
+                <ul className="cp-card cp-card-raised !p-0 divide-y divide-line">
                   {educationNews.map((news) => (
                     <li key={news.id}>
                       <button
@@ -343,8 +341,8 @@ export default function HomePage() {
             )}
           </section>
 
-          {/* 달력 */}
-          <Card as="section" aria-labelledby="cal-heading">
+          {/* 달력 — 홈 주요 패널 raised. 날짜는 장식(가짜 cursor 제거) */}
+          <Card as="section" raised aria-labelledby="cal-heading">
             <h2 id="cal-heading" className="cp-h3 mb-4">
               달력
             </h2>
@@ -352,10 +350,10 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => shiftMonth(-1)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-surface"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-surface-elevated"
                 aria-label="이전 달"
               >
-                <CrepassIcon name="chevron-left" size={22} />
+                <CrepassIcon name="chevron-left" sizeToken="xl" />
               </button>
               <p className="text-sm font-medium text-ink">
                 {currentDate.toLocaleDateString("ko-KR", {
@@ -366,10 +364,10 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => shiftMonth(1)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-surface"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-surface-elevated"
                 aria-label="다음 달"
               >
-                <CrepassIcon name="chevron-right" size={22} />
+                <CrepassIcon name="chevron-right" sizeToken="xl" />
               </button>
             </div>
 
@@ -390,7 +388,7 @@ export default function HomePage() {
                       isToday
                         ? "bg-brand text-white font-medium"
                         : isCurrentMonth
-                          ? "text-ink hover:bg-surface cursor-pointer"
+                          ? "text-ink"
                           : "text-ink-subtle"
                     }`}
                   >
