@@ -18,6 +18,44 @@ describe("parseCsv", () => {
     const r = parseCsv("studentName,rawText\n");
     expect(r.ok).toBe(false);
   });
+
+  it("rejects missing studentName header", () => {
+    const r = parseCsv("studentNumber,rawText\n202401001,내용");
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.error).toContain("studentName");
+  });
+
+  it("rejects missing rawText header", () => {
+    const r = parseCsv("studentName,studentNumber\n홍길동,202401001");
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.error).toContain("rawText");
+  });
+
+  it("skips broken rows missing required field values", () => {
+    const csv = `studentName,rawText
+홍길동,유효함
+,빈이름
+박민수,`;
+    const r = parseCsv(csv);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.fragments).toHaveLength(1);
+    expect(r.fragments[0].studentName).toBe("홍길동");
+    expect(r.fragments[0].rawText).toBe("유효함");
+  });
+
+  it("preserves multiline quoted rawText", () => {
+    const csv = `studentName,rawText
+홍길동,"수업 중 질문함
+토론에도 참여함"`;
+    const r = parseCsv(csv);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.fragments).toHaveLength(1);
+    expect(r.fragments[0].rawText).toBe("수업 중 질문함\n토론에도 참여함");
+  });
 });
 
 describe("parseTxtFile", () => {
