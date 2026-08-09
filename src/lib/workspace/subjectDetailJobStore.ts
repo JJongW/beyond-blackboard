@@ -58,6 +58,22 @@ function patchJob(jobId: string, patch: Partial<SubjectDetailJob>) {
 /** jobId별 진행 중인 파이프라인 Promise — 동시 runPipeline 호출이 같은 실행을 공유하도록 함 */
 const inflightPipelines = new Map<string, Promise<void>>();
 
+/**
+ * in-flight dedup만 적용해 실제로 파이프라인을 시작 — `ready` 가드는 호출자
+ * (`runPipeline`)의 책임으로 분리해, `retryDraft`가 그 가드를 우회하고도
+ * 동시 실행 dedup은 그대로 누릴 수 있게 함.
+ */
+function startPipeline(jobId: string): Promise<void> {
+  const inflight = inflightPipelines.get(jobId);
+  if (inflight) return inflight;
+
+  const run = runPipelineInternal(jobId).finally(() => {
+    inflightPipelines.delete(jobId);
+  });
+  inflightPipelines.set(jobId, run);
+  return run;
+}
+
 async function runPipelineInternal(jobId: string): Promise<void> {
   patchJob(jobId, { status: "drafting" });
   const provider = getActiveDraftProvider();
@@ -150,22 +166,20 @@ export const subjectDetailJobStore = {
   runPipeline(jobId: string): Promise<void> {
     const existing = store.getState().jobs.find((j) => j.id === jobId);
     if (existing?.status === "ready") return Promise.resolve();
-
-    const inflight = inflightPipelines.get(jobId);
-    if (inflight) return inflight;
-
-    const run = runPipelineInternal(jobId).finally(() => {
-      inflightPipelines.delete(jobId);
-    });
-    inflightPipelines.set(jobId, run);
-    return run;
+    return startPipeline(jobId);
   },
 
   /**
-   * 사용자가 「다시 시도」를 눌렀을 때 진입점 — job/entry의 이전 에러를 지우고
-   * runPipeline을 재실행. `drafting` 상태로 새로고침된 job(진행 중 Promise가
-   * 메모리에만 있던 inflightPipelines가 비어 있어 영영 멈춰 있는 경우)과
-   * `failed` job, 그리고 일부 entry만 draftError가 남은 `ready` job 모두를 다룸.
+   * 사용자가 「다시 시도」를 눌렀을 때 진입점 — job을 `drafting`으로 되돌리고
+   * job/entry의 이전 에러를 지운 뒤 파이프라인을 강제로 재실행.
+   *
+   * `runPipeline`과 달리 `ready` 가드를 거치지 않는다 — Ollama 폴백으로 일부
+   * entry만 draftError가 남은 채 job이 `ready`로 끝난 경우가 바로 이 버튼의
+   * 주 대상이므로, `ready`를 이유로 no-op하면 재시도가 아무 효과가 없다.
+   * `drafting` 상태로 새로고침된 job(진행 중 Promise가 메모리 전용인
+   * inflightPipelines에서 사라져 영영 멈춰 있는 경우)과 `failed` job도 함께 다룸.
+   * 이미 실행 중인 파이프라인이 있으면 startPipeline의 dedup으로 새로 시작하지
+   * 않고 그 완료를 기다린다.
    */
   retryDraft(jobId: string): Promise<void> {
     store.setState((s) => ({
@@ -173,7 +187,9 @@ export const subjectDetailJobStore = {
         j.id === jobId
           ? {
               ...j,
+              status: "drafting",
               errorMessage: undefined,
+              notifiedAt: undefined,
               entries: j.entries.map((e) =>
                 e.draftError ? { ...e, draftError: undefined } : e,
               ),
@@ -181,7 +197,7 @@ export const subjectDetailJobStore = {
           : j,
       ),
     }));
-    return this.runPipeline(jobId);
+    return startPipeline(jobId);
   },
 
   /** entry 필드 부분 수정 — rawText/aiText 편집 등 공용 진입점 */

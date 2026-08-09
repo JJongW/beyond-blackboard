@@ -3,14 +3,25 @@ import type { DraftProvider } from "../draftProvider";
 
 // runPipeline의 동시 호출 가드를 검증하려면 provider.generate가 즉시 resolve되지 않아야
 // 두 호출이 실제로 "겹치는" 시점(첫 호출이 아직 drafting 중)을 안정적으로 만들 수 있음.
+// retryDraft가 "실제로 provider를 다시 호출하는지" 검증하려면 특정 rawText에 대해
+// 딱 한 번 실패를 주입할 수 있어야 하므로, 그 상태를 vi.hoisted로 mock 팩토리와 공유한다.
+const hoisted = vi.hoisted(() => ({
+  failOnceFor: new Set<string>(),
+}));
+
 vi.mock("../draftProvider", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../draftProvider")>();
   const realMock = actual.createMockDraftProvider();
   const delayedProvider: DraftProvider = {
     generate: (input) =>
-      new Promise((resolve) => {
+      new Promise((resolve, reject) => {
         setTimeout(() => {
-          realMock.generate(input).then(resolve);
+          if (hoisted.failOnceFor.has(input.rawText)) {
+            hoisted.failOnceFor.delete(input.rawText);
+            reject(new Error("일시적인 Ollama 오류"));
+            return;
+          }
+          realMock.generate(input).then(resolve, reject);
         }, 10);
       }),
   };
@@ -100,20 +111,44 @@ describe("subjectDetailJobStore", () => {
     expect(notices).toHaveLength(1);
   });
 
-  it("retryDraft clears prior entry draftError and re-runs the pipeline to ready", async () => {
+  it("retryDraft calls the provider again and clears draftError after a real failure (ready job)", async () => {
     const jobId = subjectDetailJobStore.createFromFragments(fragments);
+    const entry = subjectDetailJobStore.getById(jobId)!.entries[0];
+    const { id: entryId, rawText } = entry;
+
+    // 첫 파이프라인 실행에서 이 entry의 provider 호출만 실패하도록 주입 —
+    // subjectDetailJobStore의 entry 단위 폴백으로 job은 그래도 `ready`가 됨.
+    hoisted.failOnceFor.add(rawText);
     await subjectDetailJobStore.runPipeline(jobId);
 
-    const entryId = subjectDetailJobStore.getById(jobId)!.entries[0].id;
-    subjectDetailJobStore.updateEntry(entryId, { draftError: "이전 오류" });
+    const afterFirstRun = subjectDetailJobStore.getById(jobId);
+    expect(afterFirstRun?.status).toBe("ready");
+    const failedEntry = afterFirstRun?.entries.find((e) => e.id === entryId);
+    expect(failedEntry?.draftError).toBeDefined();
+    expect(failedEntry?.aiText).toBe(rawText); // 실패 시 원본 텍스트로 폴백
+
+    // 회귀 방지: retryDraft는 runPipeline의 `ready` 조기 반환 가드를 우회해야
+    // 하므로, provider가 실제로 다시 호출되어 aiText가 갱신되는지까지 검증한다
+    // (단순히 draftError 필드만 지우고 파이프라인은 재실행하지 않는 버그가 있었음).
+    await subjectDetailJobStore.retryDraft(jobId);
+
+    const afterRetry = subjectDetailJobStore.getById(jobId);
+    expect(afterRetry?.status).toBe("ready");
+    const retriedEntry = afterRetry?.entries.find((e) => e.id === entryId);
+    expect(retriedEntry?.draftError).toBeUndefined();
+    expect(retriedEntry?.aiText).not.toBe(rawText);
+    expect(retriedEntry?.aiText.length).toBeGreaterThan(0);
+  });
+
+  it("retryDraft on a job with no errors still re-runs the pipeline to ready", async () => {
+    const jobId = subjectDetailJobStore.createFromFragments(fragments);
+    await subjectDetailJobStore.runPipeline(jobId);
 
     await subjectDetailJobStore.retryDraft(jobId);
 
     const updated = subjectDetailJobStore.getById(jobId);
     expect(updated?.status).toBe("ready");
-    expect(
-      updated?.entries.find((e) => e.id === entryId)?.draftError,
-    ).toBeUndefined();
+    expect(updated?.entries.every((e) => !e.draftError)).toBe(true);
   });
 
   it("retryDraft re-triggers a stale drafting job (simulating a reload)", async () => {
