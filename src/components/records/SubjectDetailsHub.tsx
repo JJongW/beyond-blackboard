@@ -164,6 +164,13 @@ export default function SubjectDetailsHub() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry?.id, entry?.rawText, entry?.aiText, dirtyRaw, dirtyAi]);
 
+  const ingestFragments = (fragments: IngestFragment[]) => {
+    const jobId = subjectDetailJobStore.createFromFragments(fragments);
+    setUploadFiles([]);
+    setSelectedJobId(jobId);
+    void subjectDetailJobStore.runPipeline(jobId);
+  };
+
   const onFilesSelected = async (files: File[]) => {
     setUploadFiles(files);
     setUploadError(null);
@@ -175,10 +182,27 @@ export default function SubjectDetailsHub() {
       return;
     }
 
-    const jobId = subjectDetailJobStore.createFromFragments(result.fragments);
-    setUploadFiles([]);
-    setSelectedJobId(jobId);
-    void subjectDetailJobStore.runPipeline(jobId);
+    ingestFragments(result.fragments);
+  };
+
+  const onLoadSample = async () => {
+    setUploadError(null);
+    try {
+      const res = await fetch("/fixtures/subject-details-sample.csv");
+      if (!res.ok) {
+        setUploadError("샘플 파일을 불러오지 못했습니다.");
+        return;
+      }
+      const text = await res.text();
+      const result = parseCsv(text);
+      if (!result.ok) {
+        setUploadError(result.error);
+        return;
+      }
+      ingestFragments(result.fragments);
+    } catch {
+      setUploadError("샘플 파일을 불러오는 중 오류가 발생했습니다.");
+    }
   };
 
   const markEdited = () => {
@@ -289,17 +313,28 @@ export default function SubjectDetailsHub() {
             hint="CSV(studentName, studentNumber?, rawText) 또는 학생별 .txt 여러 개"
             error={uploadError ?? undefined}
           >
-            <AttachmentInput
-              id="subject-detail-upload"
-              label=""
-              hint="CSV 1개 또는 .txt 여러 개"
-              accept=".csv,text/csv,.txt"
-              multiple
-              files={uploadFiles}
-              onChange={(files) => {
-                void onFilesSelected(files);
-              }}
-            />
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div className="min-w-0 flex-1">
+                <AttachmentInput
+                  id="subject-detail-upload"
+                  label=""
+                  hint="CSV 1개 또는 .txt 여러 개"
+                  accept=".csv,text/csv,.txt"
+                  multiple
+                  files={uploadFiles}
+                  onChange={(files) => {
+                    void onFilesSelected(files);
+                  }}
+                />
+              </div>
+              <ActionButton
+                variant="neutralOutline"
+                type="button"
+                onClick={() => void onLoadSample()}
+              >
+                샘플 불러오기
+              </ActionButton>
+            </div>
           </Field>
         </Card>
 
