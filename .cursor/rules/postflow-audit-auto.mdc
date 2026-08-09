@@ -1,0 +1,13 @@
+---
+description: After finishing a multi-step feature/flow, auto-run post-flow web service audit
+alwaysApply: true
+---
+
+# Post-Flow Audit — auto after handoff
+
+When you have **finished implementing** a multi-step product feature or critical user flow (code shipped in-session, PR-ready, or user said 완료/끝/머지), **before ending your turn**:
+
+1. Run the `web-service-postflow-audit` skill (Phases 0–8).
+2. Output the required scorecard (GO / GO WITH CAVEATS / NO-GO).
+
+**Do not auto-run** when the turn is only Q&A, brainstorming/spec design without implementation, a tiny typo, or the user said to skip the audit / already received a Post-Flow Audit scorecard for this same handoff.

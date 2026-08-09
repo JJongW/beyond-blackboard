@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import MainLayout from "@/components/layout/MainLayout";
@@ -9,12 +11,17 @@ import Card from "@/components/ui/Card";
 import Divider from "@/components/ui/Divider";
 import ActionButton from "@/components/ui/ActionButton";
 import HelpBubble from "@/components/ui/HelpBubble";
+import Badge from "@/components/ui/Badge";
+import { evaluationJobStore } from "@/lib/workspace/evaluationJobStore";
+import { useSingletonStore } from "@/lib/workspace/useSingletonStore";
 
 /**
- * 채점 — Accordion FAQ + Card 액션
+ * 채점 — 로컬 작업 목록 + FAQ
  */
 export default function EvaluationPage() {
-  const inProgress: { id: string; title: string; progress: number }[] = [];
+  const { jobs } = useSingletonStore(evaluationJobStore);
+  const inProgress = jobs.filter((j) => j.status === "in_progress");
+  const completed = jobs.filter((j) => j.status === "completed");
 
   return (
     <MainLayout>
@@ -30,7 +37,7 @@ export default function EvaluationPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <Card as="section">
             <div className="mb-4 flex items-center gap-3 text-ink">
-              <CrepassIcon name="add" size={22} weight="fill" />
+              <CrepassIcon name="add" sizeToken="xl" weight="fill" />
               <h2 className="cp-h3">새 채점</h2>
             </div>
             <p className="mb-4 text-sm text-ink-muted">
@@ -56,7 +63,7 @@ export default function EvaluationPage() {
 
           <Card as="section">
             <div className="mb-4 flex items-center gap-3 text-ink">
-              <CrepassIcon name="calendar" size={22} weight="fill" />
+              <CrepassIcon name="calendar" sizeToken="xl" weight="fill" />
               <h2 className="cp-h3">진행 중</h2>
             </div>
             {inProgress.length === 0 ? (
@@ -66,12 +73,16 @@ export default function EvaluationPage() {
             ) : (
               <ul className="space-y-2">
                 {inProgress.map((item) => (
-                  <li
-                    key={item.id}
-                    className="rounded-md border border-line px-3 py-2 text-sm text-ink"
-                  >
-                    {item.title}
-                    <span className="cp-caption ml-2">{item.progress}%</span>
+                  <li key={item.id}>
+                    <Link
+                      href={`/evaluation/${item.id}`}
+                      className="flex items-center justify-between rounded-md border border-line px-3 py-2 text-sm text-ink hover:border-line-strong hover:bg-surface-elevated"
+                    >
+                      <span className="truncate">{item.title}</span>
+                      <Badge tone="warning" size="small">
+                        {item.progress}%
+                      </Badge>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -83,13 +94,36 @@ export default function EvaluationPage() {
 
         <section>
           <h2 className="cp-h2 mb-4">최근 채점</h2>
-          <EmptyState
-            title="아직 채점 기록이 없습니다"
-            description="새 채점을 시작하면 여기에 기록이 쌓입니다."
-            actionLabel="답안지 업로드"
-            actionHref="/evaluation/new"
-            icon="grading"
-          />
+          {completed.length === 0 ? (
+            <EmptyState
+              title="아직 채점 기록이 없습니다"
+              description="새 채점을 시작하면 여기에 기록이 쌓입니다."
+              actionLabel="답안지 업로드"
+              actionHref="/evaluation/new"
+              icon="grading"
+            />
+          ) : (
+            <ul className="space-y-2">
+              {completed.map((item) => (
+                <li key={item.id}>
+                  <Link
+                    href={`/evaluation/${item.id}`}
+                    className="flex items-center justify-between rounded-md border border-line px-3 py-2.5 text-sm hover:border-line-strong hover:bg-surface-elevated"
+                  >
+                    <span>
+                      <span className="font-medium text-ink">{item.title}</span>
+                      {item.score != null && (
+                        <span className="cp-caption ml-2">{item.score}점</span>
+                      )}
+                    </span>
+                    <Badge tone="brand" size="small">
+                      완료
+                    </Badge>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <Divider label="도움말" className="my-8" />
@@ -104,7 +138,7 @@ export default function EvaluationPage() {
                 title: "어떤 파일을 올릴 수 있나요?",
                 defaultOpen: true,
                 content:
-                  "이미지·PDF 답안지를 지원할 예정입니다. 지금은 UI 미리보기입니다.",
+                  "이미지·PDF를 고를 수 있습니다. 데모에서는 파일명만 저장됩니다.",
               },
               {
                 id: "rubric",
@@ -121,7 +155,15 @@ export default function EvaluationPage() {
               {
                 id: "sync",
                 title: "성적·학생 메뉴와 연결되나요?",
-                content: "채점 결과는 추후 학생·성적 메뉴와 연결될 예정입니다.",
+                content: (
+                  <p>
+                    채점 완료 시 선택한 학생의{" "}
+                    <Link href="/grades" className="cp-link">
+                      성적
+                    </Link>
+                    이 로컬에서 갱신됩니다.
+                  </p>
+                ),
               },
             ]}
           />

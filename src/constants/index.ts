@@ -101,7 +101,7 @@ export const NOTICES: Notice[] = [
 export const SUPPORT_ITEMS: SupportItem[] = [
   {
     id: "manual",
-    title: "사용 메뉴얼",
+    title: "사용 매뉴얼",
     href: "/manual",
     icon: "fas fa-book",
   },
@@ -125,6 +125,7 @@ export const NAVIGATION_ITEMS = [
   { title: "학생", href: "/students" },
   { title: "출결", href: "/attendance" },
   { title: "채점", href: "/evaluation" },
+  { title: "성적", href: "/grades" },
   { title: "생기부", href: "/records" },
 ];
 

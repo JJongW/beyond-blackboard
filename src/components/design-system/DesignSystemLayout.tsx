@@ -85,7 +85,7 @@ export default function DesignSystemLayout({
               aria-label="문서 메뉴 열기"
               onClick={() => setMobileOpen(true)}
             >
-              <CrepassIcon name="menu" size={22} />
+              <CrepassIcon name="menu" sizeToken="xl" />
             </button>
             <Link
               href="/design-system"

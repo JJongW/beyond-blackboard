@@ -12,12 +12,21 @@ import CrepassIcon from "@/components/ui/CrepassIcon";
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  user?: { name: string; school: string };
+  onOpenSettings?: () => void;
+  onOpenLogout?: () => void;
 }
 
 /**
- * 모바일 드로어 — 내비 항목에 CrepassIcon
+ * 모바일 드로어 — 내비 + 설정/로그아웃 진입
  */
-const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
+const MobileMenu: React.FC<MobileMenuProps> = ({
+  isOpen,
+  onClose,
+  user,
+  onOpenSettings,
+  onOpenLogout,
+}) => {
   const pathname = usePathname();
 
   useEffect(() => {
@@ -70,7 +79,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
             className="inline-flex h-10 w-10 items-center justify-center rounded-md text-ink-muted hover:bg-surface-elevated hover:text-ink"
             aria-label="메뉴 닫기"
           >
-            <CrepassIcon name="close" size={24} />
+            <CrepassIcon name="close" sizeToken="2xl" />
           </button>
         </div>
 
@@ -93,7 +102,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
                 {iconName && (
                   <CrepassIcon
                     name={iconName}
-                    size={22}
+                    sizeToken="xl"
                     weight="line"
                     className={isActive ? "text-brand-ink" : "text-ink-muted"}
                   />
@@ -104,9 +113,32 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
           })}
         </nav>
 
-        <div className="border-t border-line px-6 py-4">
-          <p className="text-sm font-medium text-ink">김민준 선생님</p>
-          <p className="cp-caption mt-0.5">서울초등학교</p>
+        <div className="border-t border-line px-6 py-4 space-y-3">
+          <div>
+            <p className="text-sm font-medium text-ink">
+              {user?.name ?? "김민준"} 선생님
+            </p>
+            <p className="cp-caption mt-0.5">
+              {user?.school ?? "서울초등학교"}
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-2.5 text-left text-sm text-ink-secondary hover:bg-surface-elevated hover:text-ink"
+              onClick={() => onOpenSettings?.()}
+            >
+              <CrepassIcon name="settings" sizeToken="inline" />
+              설정
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-2.5 text-left text-sm text-[var(--cp-danger)] hover:bg-[#F8EDEA]"
+              onClick={() => onOpenLogout?.()}
+            >
+              로그아웃
+            </button>
+          </div>
         </div>
       </div>
     </>

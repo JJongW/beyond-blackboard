@@ -13,6 +13,10 @@ import Avatar from "@/components/ui/Avatar";
 import List, { ListItem } from "@/components/ui/List";
 import Menu from "@/components/ui/Menu";
 import CrepassIcon from "@/components/ui/CrepassIcon";
+import Dialog, { AlertDialog } from "@/components/ui/Dialog";
+import ActionButton from "@/components/ui/ActionButton";
+import Snackbar from "@/components/ui/Snackbar";
+import Field from "@/components/ui/Field";
 import MobileMenu from "./MobileMenu";
 
 interface HeaderProps {
@@ -20,12 +24,18 @@ interface HeaderProps {
 }
 
 /**
- * 헤더 — Top Nav Line 아이콘 + Avatar + List 알림 패널
+ * 헤더 — Top Nav + 알림 + 설정/로그아웃 안내 다이얼로그
  */
 const Header: React.FC<HeaderProps> = ({ user }) => {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const [snack, setSnack] = useState<{ open: boolean; message: string }>({
+    open: false,
+    message: "",
+  });
   const notifRef = useRef<HTMLDivElement>(null);
 
   const defaultUser: User = {
@@ -170,7 +180,6 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
                   <span className="text-base font-medium text-ink hidden md:inline">
                     {currentUser.name}
                   </span>
-                  {/* 메뉴임을 드러내는 chevron — 프로필 라벨처럼 보이던 문제 */}
                   <CrepassIcon
                     name="chevron-down"
                     sizeToken="sm"
@@ -181,12 +190,15 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
               items={[
                 {
                   id: "settings",
-                  label: "설정 (준비 중)",
+                  label: "설정",
                   icon: <CrepassIcon name="settings" sizeToken="inline" />,
+                  onSelect: () => setSettingsOpen(true),
                 },
                 {
                   id: "logout",
-                  label: "로그아웃 (준비 중)",
+                  label: "로그아웃",
+                  destructive: true,
+                  onSelect: () => setLogoutOpen(true),
                 },
               ]}
             />
@@ -198,7 +210,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
             aria-label="메뉴 열기"
             onClick={() => setIsMobileMenuOpen(true)}
           >
-            <CrepassIcon name="menu" size={24} />
+            <CrepassIcon name="menu" sizeToken="2xl" />
           </button>
         </div>
       </div>
@@ -206,6 +218,83 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
       <MobileMenu
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
+        user={currentUser}
+        onOpenSettings={() => {
+          setIsMobileMenuOpen(false);
+          setSettingsOpen(true);
+        }}
+        onOpenLogout={() => {
+          setIsMobileMenuOpen(false);
+          setLogoutOpen(true);
+        }}
+      />
+
+      <Dialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        title="설정"
+        actions={
+          <ActionButton
+            variant="brandSolid"
+            onClick={() => setSettingsOpen(false)}
+          >
+            확인
+          </ActionButton>
+        }
+      >
+        <p className="mb-4">
+          계정·알림 설정은 곧 연결됩니다. 지금은 데모 프로필만 확인할 수
+          있습니다.
+        </p>
+        <div className="space-y-3">
+          <Field label="이름" htmlFor="settings-name">
+            <input
+              id="settings-name"
+              className="cp-input w-full"
+              value={currentUser.name}
+              readOnly
+            />
+          </Field>
+          <Field label="이메일" htmlFor="settings-email">
+            <input
+              id="settings-email"
+              className="cp-input w-full"
+              value={currentUser.email}
+              readOnly
+            />
+          </Field>
+          <Field label="학교" htmlFor="settings-school">
+            <input
+              id="settings-school"
+              className="cp-input w-full"
+              value={currentUser.school}
+              readOnly
+            />
+          </Field>
+        </div>
+      </Dialog>
+
+      <AlertDialog
+        open={logoutOpen}
+        onClose={() => setLogoutOpen(false)}
+        title="로그아웃"
+        description="인증이 아직 연결되지 않아 실제로 로그아웃되지 않습니다. 데모 미리보기만 제공합니다."
+        confirmLabel="확인"
+        cancelLabel="닫기"
+        onConfirm={() => {
+          setLogoutOpen(false);
+          setSnack({
+            open: true,
+            message: "로그아웃은 곧 연결됩니다.",
+          });
+        }}
+      />
+
+      <Snackbar
+        open={snack.open}
+        message={snack.message}
+        tone="neutral"
+        onClose={() => setSnack({ open: false, message: "" })}
       />
     </header>
   );

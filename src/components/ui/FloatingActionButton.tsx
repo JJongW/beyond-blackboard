@@ -24,7 +24,7 @@ export default function FloatingActionButton({
 
   const content = (
     <>
-      <CrepassIcon name="add" size={22} className="text-white" />
+      <CrepassIcon name="add" sizeToken="xl" className="text-white" />
       <span className="pr-0.5">{label}</span>
     </>
   );
