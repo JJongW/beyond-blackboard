@@ -101,7 +101,7 @@ export const NOTICES: Notice[] = [
 export const SUPPORT_ITEMS: SupportItem[] = [
   {
     id: "manual",
-    title: "사용 메뉴얼",
+    title: "사용 매뉴얼",
     href: "/manual",
     icon: "fas fa-book",
   },

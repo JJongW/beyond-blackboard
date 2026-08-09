@@ -8,71 +8,10 @@ import CrepassIcon from "@/components/ui/CrepassIcon";
 import Chip from "@/components/ui/Chip";
 import Badge from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
-import type { CrepassIconName } from "@/constants/designSystemNav";
-
-interface RecordTemplate {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  recentlyUsed: boolean;
-}
-
-const RECORD_TEMPLATES: RecordTemplate[] = [
-  {
-    id: "subject-details",
-    title: "과목별 세부특기사항",
-    description: "과목별 학업 성취도와 특기사항 기록",
-    category: "academic",
-    recentlyUsed: true,
-  },
-  {
-    id: "creative-activities",
-    title: "창의적 체험활동",
-    description: "자율·동아리·봉사·진로활동 기록",
-    category: "experience",
-    recentlyUsed: false,
-  },
-  {
-    id: "behavior-opinion",
-    title: "행동특성 및 종합의견",
-    description: "행동 특성과 학교생활 종합 의견",
-    category: "behavior",
-    recentlyUsed: true,
-  },
-  {
-    id: "career-activities",
-    title: "진로활동 기록",
-    description: "진로 탐색 과정과 관련 활동",
-    category: "career",
-    recentlyUsed: false,
-  },
-  {
-    id: "reading-activities",
-    title: "독서활동 기록",
-    description: "독서 이력과 독후 활동",
-    category: "reading",
-    recentlyUsed: false,
-  },
-  {
-    id: "club-activities",
-    title: "동아리활동 기록",
-    description: "동아리 활동 내용과 성과",
-    category: "experience",
-    recentlyUsed: true,
-  },
-];
-
-const CATEGORY_CONFIG: Record<
-  string,
-  { label: string; icon: CrepassIconName }
-> = {
-  academic: { label: "교과", icon: "notebook" },
-  experience: { label: "체험", icon: "crayon" },
-  behavior: { label: "행동", icon: "user" },
-  career: { label: "진로", icon: "clipboard" },
-  reading: { label: "독서", icon: "records" },
-};
+import {
+  RECORD_CATEGORY_CONFIG,
+  RECORD_TEMPLATES,
+} from "@/lib/workspace/recordTemplates";
 
 /**
  * 생기부 목록 — Chip 필터 + Badge + EmptyState 통일
@@ -85,7 +24,10 @@ export default function RecordsPage() {
       ? RECORD_TEMPLATES
       : RECORD_TEMPLATES.filter((t) => t.category === selectedCategory);
 
-  const categoryCounts: Record<"all" | keyof typeof CATEGORY_CONFIG, number> = {
+  const categoryCounts: Record<
+    "all" | keyof typeof RECORD_CATEGORY_CONFIG,
+    number
+  > = {
     all: RECORD_TEMPLATES.length,
     academic: RECORD_TEMPLATES.filter((t) => t.category === "academic").length,
     experience: RECORD_TEMPLATES.filter((t) => t.category === "experience")
@@ -116,7 +58,9 @@ export default function RecordsPage() {
             전체 ({categoryCounts.all})
           </Chip>
           {(
-            Object.keys(CATEGORY_CONFIG) as Array<keyof typeof CATEGORY_CONFIG>
+            Object.keys(RECORD_CATEGORY_CONFIG) as Array<
+              keyof typeof RECORD_CATEGORY_CONFIG
+            >
           ).map((key) => (
             <Chip
               key={key}
@@ -124,13 +68,13 @@ export default function RecordsPage() {
               onClick={() => setSelectedCategory(key)}
               prefix={
                 <CrepassIcon
-                  name={CATEGORY_CONFIG[key].icon}
+                  name={RECORD_CATEGORY_CONFIG[key].icon}
                   size={14}
                   className="text-inherit"
                 />
               }
             >
-              {CATEGORY_CONFIG[key].label} ({categoryCounts[key]})
+              {RECORD_CATEGORY_CONFIG[key].label} ({categoryCounts[key]})
             </Chip>
           ))}
         </div>
@@ -144,7 +88,7 @@ export default function RecordsPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredTemplates.map((template) => {
-              const config = CATEGORY_CONFIG[template.category];
+              const config = RECORD_CATEGORY_CONFIG[template.category];
               const iconName = config?.icon ?? "notebook";
 
               return (

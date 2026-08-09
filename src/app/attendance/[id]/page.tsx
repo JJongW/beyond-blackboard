@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import MainLayout from "@/components/layout/MainLayout";
 import PageHeader from "@/components/ui/PageHeader";
@@ -19,6 +19,8 @@ import IdentityPlaceholder from "@/components/ui/IdentityPlaceholder";
 import { Student, AttendanceStatus } from "@/types";
 import { studentAvatarSrc } from "@/constants/designTokens";
 import { formatKoDate, getMockClassPeriod } from "@/constants/attendanceMock";
+import { periodStore } from "@/lib/workspace/periodStore";
+import { useSingletonStore } from "@/lib/workspace/useSingletonStore";
 
 const mockStudents: Student[] = [
   {
@@ -183,8 +185,10 @@ export default function AttendanceDetailPage() {
   const params = useParams();
   const periodId = typeof params.id === "string" ? params.id : "1";
   const router = useRouter();
-  // 목록과 동일 소스 — 오늘 날짜·교시 메타 동기화
-  const mockClassPeriod = getMockClassPeriod(periodId);
+  // periodStore 우선 — 없으면 mock seed (구 링크 호환)
+  const { periods } = useSingletonStore(periodStore);
+  const mockClassPeriod =
+    periods.find((p) => p.id === periodId) ?? getMockClassPeriod(periodId);
   const [saving, setSaving] = useState(false);
   const [startTime, setStartTime] = useState(mockClassPeriod.startTime);
   const [endTime, setEndTime] = useState(mockClassPeriod.endTime);
@@ -209,6 +213,12 @@ export default function AttendanceDetailPage() {
     message: string;
     tone: "positive" | "critical";
   }>({ open: false, message: "", tone: "positive" });
+
+  // 교시 전환·추가 시 시간 필드 동기화
+  useEffect(() => {
+    setStartTime(mockClassPeriod.startTime);
+    setEndTime(mockClassPeriod.endTime);
+  }, [mockClassPeriod.id, mockClassPeriod.startTime, mockClassPeriod.endTime]);
 
   const updateAttendance = (studentId: string, status: AttendanceStatus) => {
     setAttendanceRecords((prev) => ({ ...prev, [studentId]: status }));
@@ -404,7 +414,7 @@ export default function AttendanceDetailPage() {
         </section>
 
         <div className="mt-6 flex items-center justify-end gap-3">
-          {saving && <ProgressCircle size={28} label="저장 중" />}
+          {saving && <ProgressCircle size={24} label="저장 중" />}
           <ActionButton
             variant="brandSolid"
             onClick={saveAttendance}

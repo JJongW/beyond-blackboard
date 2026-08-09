@@ -30,7 +30,7 @@ export default function EvaluationPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <Card as="section">
             <div className="mb-4 flex items-center gap-3 text-ink">
-              <CrepassIcon name="add" size={22} weight="fill" />
+              <CrepassIcon name="add" sizeToken="xl" weight="fill" />
               <h2 className="cp-h3">새 채점</h2>
             </div>
             <p className="mb-4 text-sm text-ink-muted">
@@ -56,7 +56,7 @@ export default function EvaluationPage() {
 
           <Card as="section">
             <div className="mb-4 flex items-center gap-3 text-ink">
-              <CrepassIcon name="calendar" size={22} weight="fill" />
+              <CrepassIcon name="calendar" sizeToken="xl" weight="fill" />
               <h2 className="cp-h3">진행 중</h2>
             </div>
             {inProgress.length === 0 ? (
