@@ -103,9 +103,12 @@ export default function SubjectDetailsHub() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [rawDraft, setRawDraft] = useState("");
   const [aiDraft, setAiDraft] = useState("");
+  const [dirtyRaw, setDirtyRaw] = useState(false);
+  const [dirtyAi, setDirtyAi] = useState(false);
   const [mobileTab, setMobileTab] = useState<"raw" | "ai">("raw");
   const [snack, setSnack] = useState<string | null>(null);
   const appliedQueryJob = useRef(false);
+  const lastEntryIdRef = useRef<string | null>(null);
 
   const job = jobs.find((j) => j.id === selectedJobId) ?? null;
   const entry = job?.entries.find((e) => e.id === selectedEntryId) ?? null;
@@ -134,19 +137,32 @@ export default function SubjectDetailsHub() {
     }
   }, [job, selectedEntryId]);
 
-  // entry 선택이 바뀌거나 초안 생성이 끝나면 편집 버퍼를 최신 저장값으로 동기화
+  // entry 선택이 바뀌면 편집 버퍼를 리셋하고, 같은 entry라면 사용자가
+  // 아직 손대지 않은(=dirty 아닌) 필드만 스토어 최신값으로 동기화
+  // (드래프팅 중 백그라운드에서 aiText가 채워져도 편집 중인 내용을 덮어쓰지 않음)
   useEffect(() => {
     if (!entry) {
+      lastEntryIdRef.current = null;
       setRawDraft("");
       setAiDraft("");
+      setDirtyRaw(false);
+      setDirtyAi(false);
       return;
     }
-    setRawDraft(entry.rawText);
-    setAiDraft(entry.aiText);
-    // entry.id/job.status만 의존 — entry 전체를 넣으면 저장·복사 시마다
-    // 스토어가 갱신되어 편집 중인 버퍼가 매번 덮어써짐
+    if (lastEntryIdRef.current !== entry.id) {
+      lastEntryIdRef.current = entry.id;
+      setRawDraft(entry.rawText);
+      setAiDraft(entry.aiText);
+      setDirtyRaw(false);
+      setDirtyAi(false);
+      return;
+    }
+    if (!dirtyRaw) setRawDraft(entry.rawText);
+    if (!dirtyAi) setAiDraft(entry.aiText);
+    // entry의 개별 스칼라 필드만 의존 — entry 객체 전체를 넣으면 매 스토어
+    // 갱신마다(참조가 바뀌므로) 재동기화되어 위 dirty 가드가 무의미해짐
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entry?.id, job?.status]);
+  }, [entry?.id, entry?.rawText, entry?.aiText, dirtyRaw, dirtyAi]);
 
   const onFilesSelected = async (files: File[]) => {
     setUploadFiles(files);
@@ -171,12 +187,26 @@ export default function SubjectDetailsHub() {
     }
   };
 
+  const onRawChange = (value: string) => {
+    setRawDraft(value);
+    setDirtyRaw(true);
+    markEdited();
+  };
+
+  const onAiChange = (value: string) => {
+    setAiDraft(value);
+    setDirtyAi(true);
+    markEdited();
+  };
+
   const onSave = () => {
     if (!entry) return;
     subjectDetailJobStore.updateEntry(entry.id, {
       rawText: rawDraft,
       aiText: aiDraft,
     });
+    setDirtyRaw(false);
+    setDirtyAi(false);
     setSnack("저장했습니다.");
   };
 
@@ -186,6 +216,8 @@ export default function SubjectDetailsHub() {
       rawText: rawDraft,
       aiText: aiDraft,
     });
+    setDirtyRaw(false);
+    setDirtyAi(false);
     try {
       await navigator.clipboard.writeText(aiDraft);
       subjectDetailJobStore.setReviewStatus(entry.id, "copied");
@@ -357,10 +389,7 @@ export default function SubjectDetailsHub() {
                     className="cp-input w-full resize-y"
                     value={rawDraft}
                     disabled={!entry}
-                    onChange={(e) => {
-                      setRawDraft(e.target.value);
-                      markEdited();
-                    }}
+                    onChange={(e) => onRawChange(e.target.value)}
                   />
                 </Field>
                 <Field label="AI 초안" htmlFor="subject-detail-ai">
@@ -372,11 +401,8 @@ export default function SubjectDetailsHub() {
                       isReviewable ? "" : "AI가 초안을 작성하는 중입니다…"
                     }
                     value={aiDraft}
-                    disabled={!entry || !isReviewable}
-                    onChange={(e) => {
-                      setAiDraft(e.target.value);
-                      markEdited();
-                    }}
+                    disabled={!entry}
+                    onChange={(e) => onAiChange(e.target.value)}
                   />
                 </Field>
               </Card>
@@ -464,10 +490,7 @@ export default function SubjectDetailsHub() {
                   className="cp-input w-full resize-y"
                   value={rawDraft}
                   disabled={!entry}
-                  onChange={(e) => {
-                    setRawDraft(e.target.value);
-                    markEdited();
-                  }}
+                  onChange={(e) => onRawChange(e.target.value)}
                 />
               ) : (
                 <textarea
@@ -478,11 +501,8 @@ export default function SubjectDetailsHub() {
                     isReviewable ? "" : "AI가 초안을 작성하는 중입니다…"
                   }
                   value={aiDraft}
-                  disabled={!entry || !isReviewable}
-                  onChange={(e) => {
-                    setAiDraft(e.target.value);
-                    markEdited();
-                  }}
+                  disabled={!entry}
+                  onChange={(e) => onAiChange(e.target.value)}
                 />
               )}
 
