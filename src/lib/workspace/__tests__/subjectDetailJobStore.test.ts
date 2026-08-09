@@ -152,15 +152,30 @@ describe("subjectDetailJobStore", () => {
     expect(untouched?.aiText).toBe(teacherEditedText);
   });
 
-  it("retryDraft on a job with no errors still re-runs the pipeline to ready", async () => {
+  it("retryDraft is a no-op success when no entry needs regeneration (preserves aiText, no provider call)", async () => {
     const jobId = subjectDetailJobStore.createFromFragments(fragments);
     await subjectDetailJobStore.runPipeline(jobId);
+
+    // 모든 entry가 이미 정상 생성된 뒤 교사가 둘 다 직접 다듬어 저장했다고
+    // 가정 — mock provider가 다시 호출되면 이 텍스트와 다른 값을 반환하므로,
+    // 그대로 남아 있다는 것 자체가 "재생성이 일어나지 않았음"의 증거가 된다.
+    const [entry0, entry1] = subjectDetailJobStore.getById(jobId)!.entries;
+    const teacherText0 = "선생님이 다듬은 문장 1";
+    const teacherText1 = "선생님이 다듬은 문장 2";
+    subjectDetailJobStore.updateEntry(entry0.id, { aiText: teacherText0 });
+    subjectDetailJobStore.updateEntry(entry1.id, { aiText: teacherText1 });
 
     await subjectDetailJobStore.retryDraft(jobId);
 
     const updated = subjectDetailJobStore.getById(jobId);
     expect(updated?.status).toBe("ready");
     expect(updated?.entries.every((e) => !e.draftError)).toBe(true);
+    expect(updated?.entries.find((e) => e.id === entry0.id)?.aiText).toBe(
+      teacherText0,
+    );
+    expect(updated?.entries.find((e) => e.id === entry1.id)?.aiText).toBe(
+      teacherText1,
+    );
   });
 
   it("retryDraft re-triggers a stale drafting job (simulating a reload)", async () => {

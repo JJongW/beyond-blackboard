@@ -198,8 +198,15 @@ export const subjectDetailJobStore = {
    * 덮어쓰면 안 되므로, "재생성이 필요한" entry(= draftError가 있거나
    * aiText가 아직 비어 있는 것)만 다시 생성한다. 이 판단은 반드시 아래에서
    * draftError를 지우기 **전** 스냅샷 기준으로 해야 한다 — 지운 뒤에는
-   * draftError가 이미 없어 대상을 구분할 수 없다. 대상이 하나도 없으면(예:
-   * entry별 오류 없이 job 자체가 치명적으로 실패한 경우) 전체를 재생성한다.
+   * draftError가 이미 없어 대상을 구분할 수 없다.
+   *
+   * 재생성이 필요한 entry가 하나도 없으면(모든 entry에 draftError도 없고
+   * aiText도 이미 채워져 있음) provider를 전혀 호출하지 않고 job만
+   * `ready`로 되돌린다 — "대상이 없으니 전체 재생성"은 얻는 것 없이 이미
+   * 정상이거나 교사가 편집·저장한 aiText를 덮어쓸 위험만 만든다. 이 분기는
+   * job-level 오류만 있고(예: notifyHub 실패 등으로 `failed`가 됐지만 entry
+   * 자체는 이미 다 채워진 드문 경우) entry는 멀쩡한 상황의 유일한 복구
+   * 경로이기도 하다.
    */
   retryDraft(jobId: string): Promise<void> {
     const job = store.getState().jobs.find((j) => j.id === jobId);
@@ -208,8 +215,19 @@ export const subjectDetailJobStore = {
     const needsRegen = job.entries.filter(
       (e) => e.draftError || !e.aiText.trim(),
     );
-    const onlyEntryIds =
-      needsRegen.length > 0 ? new Set(needsRegen.map((e) => e.id)) : undefined;
+
+    if (needsRegen.length === 0) {
+      store.setState((s) => ({
+        jobs: s.jobs.map((j) =>
+          j.id === jobId
+            ? { ...j, status: "ready", errorMessage: undefined }
+            : j,
+        ),
+      }));
+      return Promise.resolve();
+    }
+
+    const onlyEntryIds = new Set(needsRegen.map((e) => e.id));
 
     store.setState((s) => ({
       jobs: s.jobs.map((j) =>
