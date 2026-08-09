@@ -111,33 +111,45 @@ describe("subjectDetailJobStore", () => {
     expect(notices).toHaveLength(1);
   });
 
-  it("retryDraft calls the provider again and clears draftError after a real failure (ready job)", async () => {
+  it("retryDraft regenerates only the failed entry and leaves a teacher-edited healthy entry untouched", async () => {
     const jobId = subjectDetailJobStore.createFromFragments(fragments);
-    const entry = subjectDetailJobStore.getById(jobId)!.entries[0];
-    const { id: entryId, rawText } = entry;
+    const [entry0, entry1] = subjectDetailJobStore.getById(jobId)!.entries;
 
-    // 첫 파이프라인 실행에서 이 entry의 provider 호출만 실패하도록 주입 —
+    // 첫 파이프라인 실행에서 entry0의 provider 호출만 실패하도록 주입 —
     // subjectDetailJobStore의 entry 단위 폴백으로 job은 그래도 `ready`가 됨.
-    hoisted.failOnceFor.add(rawText);
+    hoisted.failOnceFor.add(entry0.rawText);
     await subjectDetailJobStore.runPipeline(jobId);
 
     const afterFirstRun = subjectDetailJobStore.getById(jobId);
     expect(afterFirstRun?.status).toBe("ready");
-    const failedEntry = afterFirstRun?.entries.find((e) => e.id === entryId);
+    const failedEntry = afterFirstRun?.entries.find((e) => e.id === entry0.id);
     expect(failedEntry?.draftError).toBeDefined();
-    expect(failedEntry?.aiText).toBe(rawText); // 실패 시 원본 텍스트로 폴백
+    expect(failedEntry?.aiText).toBe(entry0.rawText); // 실패 시 원본 텍스트로 폴백
 
-    // 회귀 방지: retryDraft는 runPipeline의 `ready` 조기 반환 가드를 우회해야
+    // entry1은 정상 생성됐고, 교사가 이후 직접 수정해 저장했다고 가정 —
+    // 이 편집 내용은 재시도로 절대 덮어써지면 안 된다.
+    const teacherEditedText = "선생님이 직접 다듬어 저장한 문장입니다.";
+    subjectDetailJobStore.updateEntry(entry1.id, {
+      aiText: teacherEditedText,
+    });
+
+    // 회귀 방지 1: retryDraft는 runPipeline의 `ready` 조기 반환 가드를 우회해야
     // 하므로, provider가 실제로 다시 호출되어 aiText가 갱신되는지까지 검증한다
     // (단순히 draftError 필드만 지우고 파이프라인은 재실행하지 않는 버그가 있었음).
+    // 회귀 방지 2: 재생성은 draftError가 있는 entry0만 대상이어야 하고, 이미
+    // 정상이거나 교사가 편집·저장한 entry1의 aiText를 덮어쓰면 안 된다.
     await subjectDetailJobStore.retryDraft(jobId);
 
     const afterRetry = subjectDetailJobStore.getById(jobId);
     expect(afterRetry?.status).toBe("ready");
-    const retriedEntry = afterRetry?.entries.find((e) => e.id === entryId);
-    expect(retriedEntry?.draftError).toBeUndefined();
-    expect(retriedEntry?.aiText).not.toBe(rawText);
-    expect(retriedEntry?.aiText.length).toBeGreaterThan(0);
+
+    const regenerated = afterRetry?.entries.find((e) => e.id === entry0.id);
+    expect(regenerated?.draftError).toBeUndefined();
+    expect(regenerated?.aiText).not.toBe(entry0.rawText);
+    expect(regenerated?.aiText.length).toBeGreaterThan(0);
+
+    const untouched = afterRetry?.entries.find((e) => e.id === entry1.id);
+    expect(untouched?.aiText).toBe(teacherEditedText);
   });
 
   it("retryDraft on a job with no errors still re-runs the pipeline to ready", async () => {

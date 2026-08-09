@@ -62,19 +62,29 @@ const inflightPipelines = new Map<string, Promise<void>>();
  * in-flight dedup만 적용해 실제로 파이프라인을 시작 — `ready` 가드는 호출자
  * (`runPipeline`)의 책임으로 분리해, `retryDraft`가 그 가드를 우회하고도
  * 동시 실행 dedup은 그대로 누릴 수 있게 함.
+ *
+ * `onlyEntryIds`가 주어지면 해당 entry만 재생성(다른 entry는 건드리지 않음) —
+ * `retryDraft`가 이미 정상 생성됐거나 교사가 편집·저장한 aiText를 재생성으로
+ * 덮어쓰지 않기 위해 사용.
  */
-function startPipeline(jobId: string): Promise<void> {
+function startPipeline(
+  jobId: string,
+  onlyEntryIds?: Set<string>,
+): Promise<void> {
   const inflight = inflightPipelines.get(jobId);
   if (inflight) return inflight;
 
-  const run = runPipelineInternal(jobId).finally(() => {
+  const run = runPipelineInternal(jobId, onlyEntryIds).finally(() => {
     inflightPipelines.delete(jobId);
   });
   inflightPipelines.set(jobId, run);
   return run;
 }
 
-async function runPipelineInternal(jobId: string): Promise<void> {
+async function runPipelineInternal(
+  jobId: string,
+  onlyEntryIds?: Set<string>,
+): Promise<void> {
   patchJob(jobId, { status: "drafting" });
   const provider = getActiveDraftProvider();
 
@@ -83,6 +93,9 @@ async function runPipelineInternal(jobId: string): Promise<void> {
     if (!job) throw new Error(`job을 찾을 수 없습니다: ${jobId}`);
 
     for (const entry of job.entries) {
+      // onlyEntryIds가 있으면 그 안에 없는 entry(이미 정상 생성됐거나 교사가
+      // 편집·저장한 것)는 건드리지 않고 그대로 둔다
+      if (onlyEntryIds && !onlyEntryIds.has(entry.id)) continue;
       try {
         const aiText = await provider.generate({ rawText: entry.rawText });
         patchEntry(entry.id, { aiText, draftError: undefined });
@@ -180,8 +193,24 @@ export const subjectDetailJobStore = {
    * inflightPipelines에서 사라져 영영 멈춰 있는 경우)과 `failed` job도 함께 다룸.
    * 이미 실행 중인 파이프라인이 있으면 startPipeline의 dedup으로 새로 시작하지
    * 않고 그 완료를 기다린다.
+   *
+   * entry 선별 — 정상 생성됐거나 교사가 편집·저장한 aiText를 재시도로
+   * 덮어쓰면 안 되므로, "재생성이 필요한" entry(= draftError가 있거나
+   * aiText가 아직 비어 있는 것)만 다시 생성한다. 이 판단은 반드시 아래에서
+   * draftError를 지우기 **전** 스냅샷 기준으로 해야 한다 — 지운 뒤에는
+   * draftError가 이미 없어 대상을 구분할 수 없다. 대상이 하나도 없으면(예:
+   * entry별 오류 없이 job 자체가 치명적으로 실패한 경우) 전체를 재생성한다.
    */
   retryDraft(jobId: string): Promise<void> {
+    const job = store.getState().jobs.find((j) => j.id === jobId);
+    if (!job) return Promise.resolve();
+
+    const needsRegen = job.entries.filter(
+      (e) => e.draftError || !e.aiText.trim(),
+    );
+    const onlyEntryIds =
+      needsRegen.length > 0 ? new Set(needsRegen.map((e) => e.id)) : undefined;
+
     store.setState((s) => ({
       jobs: s.jobs.map((j) =>
         j.id === jobId
@@ -197,7 +226,7 @@ export const subjectDetailJobStore = {
           : j,
       ),
     }));
-    return startPipeline(jobId);
+    return startPipeline(jobId, onlyEntryIds);
   },
 
   /** entry 필드 부분 수정 — rawText/aiText 편집 등 공용 진입점 */
