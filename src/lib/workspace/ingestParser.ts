@@ -5,10 +5,11 @@ export type { IngestFragment } from "./subjectDetailTypes";
 type ParseCsvResult =
   { ok: true; fragments: IngestFragment[] } | { ok: false; error: string };
 
-/** 따옴표 상태를 존중하며 CSV 레코드(행) 분리 — quoted 필드 내 개행 유지 */
-function splitCsvRecords(text: string): string[] {
-  const records: string[] = [];
-  let current = "";
+/** CSV 전체를 레코드·필드로 분리 (따옴표·이스케이프·개행·쉼표 단일 상태 머신) */
+function parseCsvRows(text: string): string[][] {
+  const rows: string[][] = [];
+  let currentRow: string[] = [];
+  let currentField = "";
   let inQuotes = false;
 
   for (let i = 0; i < text.length; i++) {
@@ -17,80 +18,46 @@ function splitCsvRecords(text: string): string[] {
     if (inQuotes) {
       if (ch === '"') {
         if (text[i + 1] === '"') {
-          current += '"';
+          currentField += '"';
           i++;
         } else {
           inQuotes = false;
         }
       } else {
-        current += ch;
-      }
-    } else if (ch === '"') {
-      inQuotes = true;
-    } else if (ch === "\r") {
-      if (text[i + 1] === "\n") {
-        if (inQuotes) {
-          current += "\n";
-          i++;
-        } else {
-          records.push(current);
-          current = "";
-          i++;
-        }
-      } else if (inQuotes) {
-        current += ch;
-      } else {
-        records.push(current);
-        current = "";
-      }
-    } else if (ch === "\n") {
-      if (inQuotes) {
-        current += "\n";
-      } else {
-        records.push(current);
-        current = "";
-      }
-    } else {
-      current += ch;
-    }
-  }
-
-  records.push(current);
-  return records;
-}
-
-/** 한 레코드를 필드 배열로 분리 (따옴표 필드 최소 지원) */
-function splitCsvFields(record: string): string[] {
-  const fields: string[] = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < record.length; i++) {
-    const ch = record[i];
-
-    if (inQuotes) {
-      if (ch === '"') {
-        if (record[i + 1] === '"') {
-          current += '"';
-          i++;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        current += ch;
+        currentField += ch;
       }
     } else if (ch === '"') {
       inQuotes = true;
     } else if (ch === ",") {
-      fields.push(current);
-      current = "";
+      currentRow.push(currentField);
+      currentField = "";
+    } else if (ch === "\r") {
+      if (text[i + 1] === "\n") {
+        currentRow.push(currentField);
+        currentField = "";
+        rows.push(currentRow);
+        currentRow = [];
+        i++;
+      } else {
+        currentRow.push(currentField);
+        currentField = "";
+        rows.push(currentRow);
+        currentRow = [];
+      }
+    } else if (ch === "\n") {
+      currentRow.push(currentField);
+      currentField = "";
+      rows.push(currentRow);
+      currentRow = [];
     } else {
-      current += ch;
+      currentField += ch;
     }
   }
 
-  fields.push(current);
-  return fields;
+  currentRow.push(currentField);
+  rows.push(currentRow);
+
+  return rows;
 }
 
 function isBlankRow(fields: string[]): boolean {
@@ -104,12 +71,12 @@ export function parseCsv(text: string): ParseCsvResult {
     return { ok: false, error: "빈 파일입니다." };
   }
 
-  const records = splitCsvRecords(normalized);
-  if (records.length < 1) {
+  const rows = parseCsvRows(normalized);
+  if (rows.length < 1) {
     return { ok: false, error: "헤더가 없습니다." };
   }
 
-  const headers = splitCsvFields(records[0]).map((h) => h.trim());
+  const headers = rows[0].map((h) => h.trim());
   const nameIdx = headers.indexOf("studentName");
   const numberIdx = headers.indexOf("studentNumber");
   const textIdx = headers.indexOf("rawText");
@@ -123,11 +90,8 @@ export function parseCsv(text: string): ParseCsvResult {
 
   const fragments: IngestFragment[] = [];
 
-  for (let i = 1; i < records.length; i++) {
-    const record = records[i];
-    if (record.trim() === "") continue;
-
-    const fields = splitCsvFields(record);
+  for (let i = 1; i < rows.length; i++) {
+    const fields = rows[i];
     if (isBlankRow(fields)) continue;
 
     const studentName = (fields[nameIdx] ?? "").trim();

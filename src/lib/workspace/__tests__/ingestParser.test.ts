@@ -56,6 +56,16 @@ describe("parseCsv", () => {
     expect(r.fragments).toHaveLength(1);
     expect(r.fragments[0].rawText).toBe("수업 중 질문함\n토론에도 참여함");
   });
+
+  it("preserves commas inside quoted rawText", () => {
+    const csv = `studentName,rawText
+홍길동,"관찰, 토론 참여"`;
+    const r = parseCsv(csv);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.fragments).toHaveLength(1);
+    expect(r.fragments[0].rawText).toBe("관찰, 토론 참여");
+  });
 });
 
 describe("parseTxtFile", () => {
