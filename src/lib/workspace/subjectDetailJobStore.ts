@@ -67,8 +67,15 @@ async function runPipelineInternal(jobId: string): Promise<void> {
     if (!job) throw new Error(`job을 찾을 수 없습니다: ${jobId}`);
 
     for (const entry of job.entries) {
-      const aiText = await provider.generate({ rawText: entry.rawText });
-      patchEntry(entry.id, { aiText });
+      try {
+        const aiText = await provider.generate({ rawText: entry.rawText });
+        patchEntry(entry.id, { aiText, draftError: undefined });
+      } catch (error) {
+        // entry 단위 폴백 — provider(Ollama 등) 장애가 job 전체를 막지 않도록 원본 텍스트로 대체
+        const message =
+          error instanceof Error ? error.message : "초안 생성에 실패했습니다.";
+        patchEntry(entry.id, { aiText: entry.rawText, draftError: message });
+      }
     }
 
     patchJob(jobId, { status: "ready" });
@@ -133,7 +140,8 @@ export const subjectDetailJobStore = {
 
   /**
    * `drafting` → 각 entry에 대해 DraftProvider.generate 실행 → `ready` → notifyHub.
-   * provider 실패 시 job을 `failed`로 표시 (Phase 2 Ollama 장애 대비 동일 경로).
+   * entry별 provider 실패(Ollama 장애 등)는 `aiText = rawText` 폴백 + `draftError`만 남기고
+   * 계속 진행 — job 전체는 `failed`로 가지 않음. job을 못 찾는 등 치명적 오류일 때만 `failed`.
    *
    * - 이미 `ready`인 job은 재호출해도 no-op.
    * - 이미 `drafting` 중인(즉 in-flight) job에 동시에 호출하면 새로 실행하지 않고

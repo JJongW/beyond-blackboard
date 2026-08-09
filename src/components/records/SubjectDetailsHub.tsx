@@ -401,6 +401,12 @@ export default function SubjectDetailsHub() {
               </Card>
 
               <Card className="space-y-4">
+                {entry?.draftError && (
+                  <Callout tone="critical" icon="close">
+                    AI 초안 생성에 실패해 원본 텍스트를 그대로 표시했습니다.
+                    필요하면 AI 초안을 직접 수정해 주세요. ({entry.draftError})
+                  </Callout>
+                )}
                 {entry?.unmatchedName && !entry.studentId && (
                   <Select
                     label="학생 연결"
@@ -490,6 +496,13 @@ export default function SubjectDetailsHub() {
                   label: `${studentLabel(e, students)} · ${REVIEW_BADGE[e.reviewStatus].label}`,
                 }))}
               />
+
+              {entry?.draftError && (
+                <Callout tone="critical" icon="close">
+                  AI 초안 생성에 실패해 원본 텍스트를 그대로 표시했습니다.
+                  필요하면 AI 초안을 직접 수정해 주세요. ({entry.draftError})
+                </Callout>
+              )}
 
               {entry?.unmatchedName && !entry.studentId && (
                 <Select

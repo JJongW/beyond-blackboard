@@ -16,6 +16,8 @@ export type SubjectDetailEntry = {
   rawText: string;
   aiText: string;
   reviewStatus: "pending" | "edited" | "copied";
+  /** DraftProvider(Ollama 등) 실패 시 메시지 — 있으면 aiText는 rawText로 폴백된 상태 */
+  draftError?: string;
 };
 
 export type IngestFragment = {

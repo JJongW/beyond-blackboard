@@ -3,9 +3,22 @@
  * Phase 2 OllamaDraftProvider가 같은 시스템 프롬프트를 재사용할 수 있도록 분리.
  */
 
-/** Phase 2 Ollama 연동 시 시스템 프롬프트로 사용 예정 (Phase 1 mock은 미사용) */
+/** Phase 2 Ollama 연동 시 시스템 프롬프트로 사용 (Phase 1 mock은 미사용) */
 export const SUBJECT_DETAIL_SYSTEM_PROMPT =
   "당신은 과목별 세부특기사항을 작성하는 보조 교사입니다. 학생의 활동 기록을 바탕으로 NEIS 양식에 맞는 자연스러운 문장으로 다듬어 주세요.";
+
+/** Ollama chat API의 user 메시지 — 원본 텍스트를 NEIS 세부특기사항 문체로 변환 요청 */
+export function buildOllamaUserPrompt(rawText: string): string {
+  return [
+    "다음은 학생의 활동에 대한 원본 기록입니다.",
+    "이를 바탕으로 NEIS 과목별 세부능력 및 특기사항 양식에 맞는 자연스러운 한국어 문장으로 다듬어 주세요.",
+    "- 서술형 종결어미(~함, ~보임, ~수행함 등)를 사용하세요.",
+    "- 원본에 없는 내용을 지어내지 말고 사실에 기반해 작성하세요.",
+    "- 완성된 문장만 출력하고, 설명이나 따옴표는 포함하지 마세요.",
+    "",
+    `원본: ${rawText}`,
+  ].join("\n");
+}
 
 /** 줄바꿈·중복 공백 정리 후 한 문장 흐름으로 결합 */
 export function normalizeWhitespace(text: string): string {

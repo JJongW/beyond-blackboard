@@ -96,15 +96,11 @@ describe("resolveDraftProviderMode", () => {
     expect(resolveDraftProviderMode()).toBe("mock");
   });
 
-  it("recognizes the ollama flag (not yet wired to an Ollama provider)", () => {
+  it("recognizes the ollama flag", () => {
     process.env.AI_DRAFT_PROVIDER = "ollama";
     expect(resolveDraftProviderMode()).toBe("ollama");
   });
 
-  it("getActiveDraftProvider still returns a working mock regardless of the flag", async () => {
-    process.env.AI_DRAFT_PROVIDER = "ollama";
-    const provider = getActiveDraftProvider();
-    const result = await provider.generate({ rawText: "발표를 잘함" });
-    expect(result.length).toBeGreaterThan(0);
-  });
+  // getActiveDraftProvider의 ollama 분기 동작(실제 fetch 호출)은
+  // ollamaDraftProvider.test.ts에서 fetch를 mock해 검증함.
 });
