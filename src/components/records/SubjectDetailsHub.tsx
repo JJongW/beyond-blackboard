@@ -15,7 +15,7 @@ import Tabs from "@/components/ui/Tabs";
 import AttachmentInput from "@/components/ui/AttachmentInput";
 import Field from "@/components/ui/Field";
 import { subjectDetailJobStore } from "@/lib/workspace/subjectDetailJobStore";
-import { resolveDraftProviderMode } from "@/lib/workspace/draftProvider";
+import { isOllamaModeForClientUi } from "@/lib/workspace/draftProvider";
 import { studentStore } from "@/lib/workspace/studentStore";
 import { useSingletonStore } from "@/lib/workspace/useSingletonStore";
 import { parseCsv, parseTxtFile } from "@/lib/workspace/ingestParser";
@@ -279,7 +279,9 @@ export default function SubjectDetailsHub() {
     job != null && entryIndex >= 0 && entryIndex < job.entries.length - 1;
   const banner = job ? STATUS_BANNER[job.status] : null;
   const isReviewable = job?.status === "ready" || job?.status === "failed";
-  const isOllamaMode = resolveDraftProviderMode() === "ollama";
+  // SSR/CSR 하이드레이션 불일치 방지 — NEXT_PUBLIC_*만 읽는 전용 헬퍼 사용
+  // (AI_DRAFT_PROVIDER만 설정된 서버 환경에서는 SSR과 클라이언트 값이 달라질 수 있음)
+  const isOllamaMode = isOllamaModeForClientUi();
 
   return (
     <MainLayout>

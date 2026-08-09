@@ -2,6 +2,7 @@ import { afterEach, describe, it, expect } from "vitest";
 import {
   createMockDraftProvider,
   getActiveDraftProvider,
+  isOllamaModeForClientUi,
   resolveDraftProviderMode,
 } from "../draftProvider";
 import { MOCK_DRAFT_MAX_LENGTH } from "../subjectDetailPrompt";
@@ -131,4 +132,51 @@ describe("resolveDraftProviderMode", () => {
 
   // getActiveDraftProvider의 ollama 분기 동작(실제 fetch 호출)은
   // ollamaDraftProvider.test.ts에서 fetch를 mock해 검증함.
+});
+
+describe("isOllamaModeForClientUi", () => {
+  const originalServerEnv = process.env.AI_DRAFT_PROVIDER;
+  const originalPublicEnv = process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER;
+
+  afterEach(() => {
+    if (originalServerEnv === undefined) {
+      delete process.env.AI_DRAFT_PROVIDER;
+    } else {
+      process.env.AI_DRAFT_PROVIDER = originalServerEnv;
+    }
+    if (originalPublicEnv === undefined) {
+      delete process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER;
+    } else {
+      process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER = originalPublicEnv;
+    }
+  });
+
+  it("returns false when unset", () => {
+    delete process.env.AI_DRAFT_PROVIDER;
+    delete process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER;
+    expect(isOllamaModeForClientUi()).toBe(false);
+  });
+
+  it("returns true when NEXT_PUBLIC_AI_DRAFT_PROVIDER=ollama", () => {
+    process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER = "ollama";
+    expect(isOllamaModeForClientUi()).toBe(true);
+  });
+
+  it("ignores AI_DRAFT_PROVIDER=ollama when NEXT_PUBLIC_AI_DRAFT_PROVIDER is unset", () => {
+    // 이 리뷰 라운드의 핵심 수정 사항 회귀 방지 — SSR 렌더링에 쓰이는 이 헬퍼는
+    // non-public 변수를 절대 보면 안 된다(서버·클라이언트 하이드레이션 불일치 방지).
+    delete process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER;
+    process.env.AI_DRAFT_PROVIDER = "ollama";
+    expect(isOllamaModeForClientUi()).toBe(false);
+  });
+
+  it("is case-insensitive and trims whitespace", () => {
+    process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER = "  OLLAMA  ";
+    expect(isOllamaModeForClientUi()).toBe(true);
+  });
+
+  it("returns false for unknown values", () => {
+    process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER = "something-else";
+    expect(isOllamaModeForClientUi()).toBe(false);
+  });
 });
