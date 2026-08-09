@@ -110,6 +110,7 @@ export default function SubjectDetailsHub() {
   const [snack, setSnack] = useState<string | null>(null);
   const appliedQueryJob = useRef(false);
   const lastEntryIdRef = useRef<string | null>(null);
+  const autoResumedJobIds = useRef<Set<string>>(new Set());
 
   const job = jobs.find((j) => j.id === selectedJobId) ?? null;
   const entry = job?.entries.find((e) => e.id === selectedEntryId) ?? null;
@@ -129,6 +130,21 @@ export default function SubjectDetailsHub() {
     if (selectedJobId) return;
     if (jobs.length > 0) setSelectedJobId(jobs[0].id);
   }, [jobs, selectedJobId]);
+
+  // 새로고침 직후 `drafting` 상태로 멈춘 job 자동 재개 — inflightPipelines는
+  // 메모리 전용이라 새로고침되면 비어 있고, 저장된 job.status만 `drafting`으로
+  // 남아 영영 진행되지 않는 문제(I-1)를 mount 시 1회 runPipeline 재호출로 해결.
+  // 이미 실행 중이면 runPipeline의 inflight Map이 중복 실행을 막아준다.
+  useEffect(() => {
+    if (!job) return;
+    if (job.status !== "drafting") return;
+    if (autoResumedJobIds.current.has(job.id)) return;
+    autoResumedJobIds.current.add(job.id);
+    void subjectDetailJobStore.runPipeline(job.id);
+    // job.id/status만 의존 — job 객체 전체를 넣으면 파이프라인 진행 중 매
+    // entries 갱신마다(참조가 바뀌므로) 재실행 여부를 다시 계산하게 됨
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [job?.id, job?.status]);
 
   // 선택된 job이 바뀌거나 entry가 사라지면 첫 entry로 보정
   useEffect(() => {
@@ -273,12 +289,23 @@ export default function SubjectDetailsHub() {
     if (next) setSelectedEntryId(next.id);
   };
 
+  const onRetryDraft = () => {
+    if (!job) return;
+    void subjectDetailJobStore.retryDraft(job.id);
+  };
+
   const entryIndex =
     job && entry ? job.entries.findIndex((e) => e.id === entry.id) : -1;
   const hasNext =
     job != null && entryIndex >= 0 && entryIndex < job.entries.length - 1;
   const banner = job ? STATUS_BANNER[job.status] : null;
   const isReviewable = job?.status === "ready" || job?.status === "failed";
+  // 「다시 시도」 노출 조건(I-1/I-3) — 멈춰 보일 수 있는 drafting, 완전 실패한
+  // failed, 또는 일부 entry만 초안 생성에 실패한 경우(ready이지만 draftError 잔존)
+  const hasAnyDraftError = job?.entries.some((e) => e.draftError) ?? false;
+  const canRetryDraft =
+    job != null &&
+    (job.status === "drafting" || job.status === "failed" || hasAnyDraftError);
   // SSR/CSR 하이드레이션 불일치 방지 — NEXT_PUBLIC_*만 읽는 전용 헬퍼 사용
   // (AI_DRAFT_PROVIDER만 설정된 서버 환경에서는 SSR과 클라이언트 값이 달라질 수 있음)
   const isOllamaMode = isOllamaModeForClientUi();
@@ -356,10 +383,25 @@ export default function SubjectDetailsHub() {
             icon={job?.status === "failed" ? "close" : "records"}
             className="mb-6"
           >
-            {banner.message}
-            {job?.status === "failed" && job.errorMessage
-              ? ` (${job.errorMessage})`
-              : null}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span>
+                {banner.message}
+                {job?.status === "failed" && job.errorMessage
+                  ? ` (${job.errorMessage})`
+                  : null}
+              </span>
+              {canRetryDraft && (
+                <ActionButton
+                  variant="neutralOutline"
+                  size="small"
+                  loading={job?.status === "drafting"}
+                  disabled={job?.status === "drafting"}
+                  onClick={onRetryDraft}
+                >
+                  다시 시도
+                </ActionButton>
+              )}
+            </div>
           </Callout>
         )}
 

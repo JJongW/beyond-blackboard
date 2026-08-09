@@ -161,6 +161,29 @@ export const subjectDetailJobStore = {
     return run;
   },
 
+  /**
+   * 사용자가 「다시 시도」를 눌렀을 때 진입점 — job/entry의 이전 에러를 지우고
+   * runPipeline을 재실행. `drafting` 상태로 새로고침된 job(진행 중 Promise가
+   * 메모리에만 있던 inflightPipelines가 비어 있어 영영 멈춰 있는 경우)과
+   * `failed` job, 그리고 일부 entry만 draftError가 남은 `ready` job 모두를 다룸.
+   */
+  retryDraft(jobId: string): Promise<void> {
+    store.setState((s) => ({
+      jobs: s.jobs.map((j) =>
+        j.id === jobId
+          ? {
+              ...j,
+              errorMessage: undefined,
+              entries: j.entries.map((e) =>
+                e.draftError ? { ...e, draftError: undefined } : e,
+              ),
+            }
+          : j,
+      ),
+    }));
+    return this.runPipeline(jobId);
+  },
+
   /** entry 필드 부분 수정 — rawText/aiText 편집 등 공용 진입점 */
   updateEntry(entryId: string, patch: Partial<SubjectDetailEntry>) {
     patchEntry(entryId, patch);

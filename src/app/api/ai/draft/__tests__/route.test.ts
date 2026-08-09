@@ -27,6 +27,18 @@ describe("POST /api/ai/draft", () => {
     expect(response.status).toBe(400);
   });
 
+  it("returns 400 when rawText exceeds the max length", async () => {
+    const fetchSpy = vi.fn();
+    global.fetch = fetchSpy as unknown as typeof fetch;
+
+    const response = await POST(makeRequest({ rawText: "가".repeat(5001) }));
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.error).toContain("5000");
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
   it("proxies to Ollama and returns aiText on success", async () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -38,6 +50,38 @@ describe("POST /api/ai/draft", () => {
 
     expect(response.status).toBe(200);
     expect(data).toEqual({ aiText: "다듬어진 문장." });
+  });
+
+  it("passes an abort signal to fetch so a hung Ollama call times out", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ message: { content: "다듬어진 문장." } }),
+    });
+    global.fetch = fetchSpy as unknown as typeof fetch;
+
+    await POST(makeRequest({ rawText: "수학을 좋아함" }));
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+  });
+
+  it("returns 503 when the Ollama call times out", async () => {
+    global.fetch = vi
+      .fn()
+      .mockRejectedValue(
+        new DOMException(
+          "The operation was aborted due to timeout",
+          "TimeoutError",
+        ),
+      ) as unknown as typeof fetch;
+
+    const response = await POST(makeRequest({ rawText: "수학을 좋아함" }));
+    const data = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(data.error).toContain("timeout");
   });
 
   it("returns 503 with an error message when Ollama is unreachable", async () => {

@@ -100,6 +100,36 @@ describe("subjectDetailJobStore", () => {
     expect(notices).toHaveLength(1);
   });
 
+  it("retryDraft clears prior entry draftError and re-runs the pipeline to ready", async () => {
+    const jobId = subjectDetailJobStore.createFromFragments(fragments);
+    await subjectDetailJobStore.runPipeline(jobId);
+
+    const entryId = subjectDetailJobStore.getById(jobId)!.entries[0].id;
+    subjectDetailJobStore.updateEntry(entryId, { draftError: "이전 오류" });
+
+    await subjectDetailJobStore.retryDraft(jobId);
+
+    const updated = subjectDetailJobStore.getById(jobId);
+    expect(updated?.status).toBe("ready");
+    expect(
+      updated?.entries.find((e) => e.id === entryId)?.draftError,
+    ).toBeUndefined();
+  });
+
+  it("retryDraft re-triggers a stale drafting job (simulating a reload)", async () => {
+    const jobId = subjectDetailJobStore.createFromFragments(fragments);
+
+    // drafting 도중 in-flight 실행이 끊긴 상황을 시뮬레이션 — 새로고침 후에는
+    // inflightPipelines가 비어 있어 runPipeline 재호출만이 유일한 진행 경로.
+    const first = subjectDetailJobStore.runPipeline(jobId);
+    expect(subjectDetailJobStore.getById(jobId)?.status).toBe("drafting");
+
+    await subjectDetailJobStore.retryDraft(jobId);
+    await first;
+
+    expect(subjectDetailJobStore.getById(jobId)?.status).toBe("ready");
+  });
+
   it("updateEntry and setReviewStatus patch the matching entry only", () => {
     const jobId = subjectDetailJobStore.createFromFragments(fragments);
     const job = subjectDetailJobStore.getById(jobId);
