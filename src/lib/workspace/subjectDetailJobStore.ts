@@ -55,6 +55,38 @@ function patchJob(jobId: string, patch: Partial<SubjectDetailJob>) {
   }));
 }
 
+/** jobId별 진행 중인 파이프라인 Promise — 동시 runPipeline 호출이 같은 실행을 공유하도록 함 */
+const inflightPipelines = new Map<string, Promise<void>>();
+
+async function runPipelineInternal(jobId: string): Promise<void> {
+  patchJob(jobId, { status: "drafting" });
+  const provider = getActiveDraftProvider();
+
+  try {
+    const job = store.getState().jobs.find((j) => j.id === jobId);
+    if (!job) throw new Error(`job을 찾을 수 없습니다: ${jobId}`);
+
+    for (const entry of job.entries) {
+      const aiText = await provider.generate({ rawText: entry.rawText });
+      patchEntry(entry.id, { aiText });
+    }
+
+    patchJob(jobId, { status: "ready" });
+
+    const readyJob = store.getState().jobs.find((j) => j.id === jobId);
+    if (readyJob) {
+      notifyHub.onJobReady(readyJob);
+      patchJob(jobId, { notifiedAt: new Date().toISOString() });
+    }
+  } catch (error) {
+    patchJob(jobId, {
+      status: "failed",
+      errorMessage:
+        error instanceof Error ? error.message : "알 수 없는 오류입니다.",
+    });
+  }
+}
+
 /** 세부특기사항 job CRUD + 파이프라인 실행기 (매칭 → 초안 생성 → 알림) */
 export const subjectDetailJobStore = {
   subscribe: store.subscribe,
@@ -102,38 +134,23 @@ export const subjectDetailJobStore = {
   /**
    * `drafting` → 각 entry에 대해 DraftProvider.generate 실행 → `ready` → notifyHub.
    * provider 실패 시 job을 `failed`로 표시 (Phase 2 Ollama 장애 대비 동일 경로).
-   * 이미 `ready`인 job은 재호출해도 no-op — 중복 알림 방지.
+   *
+   * - 이미 `ready`인 job은 재호출해도 no-op.
+   * - 이미 `drafting` 중인(즉 in-flight) job에 동시에 호출하면 새로 실행하지 않고
+   *   진행 중인 동일 Promise를 반환 — 두 호출 모두 같은 완료를 기다리며 알림도 한 번만 발생.
    */
-  async runPipeline(jobId: string): Promise<void> {
+  runPipeline(jobId: string): Promise<void> {
     const existing = store.getState().jobs.find((j) => j.id === jobId);
-    if (existing?.status === "ready") return;
+    if (existing?.status === "ready") return Promise.resolve();
 
-    patchJob(jobId, { status: "drafting" });
-    const provider = getActiveDraftProvider();
+    const inflight = inflightPipelines.get(jobId);
+    if (inflight) return inflight;
 
-    try {
-      const job = store.getState().jobs.find((j) => j.id === jobId);
-      if (!job) throw new Error(`job을 찾을 수 없습니다: ${jobId}`);
-
-      for (const entry of job.entries) {
-        const aiText = await provider.generate({ rawText: entry.rawText });
-        patchEntry(entry.id, { aiText });
-      }
-
-      patchJob(jobId, { status: "ready" });
-
-      const readyJob = store.getState().jobs.find((j) => j.id === jobId);
-      if (readyJob) {
-        notifyHub.onJobReady(readyJob);
-        patchJob(jobId, { notifiedAt: new Date().toISOString() });
-      }
-    } catch (error) {
-      patchJob(jobId, {
-        status: "failed",
-        errorMessage:
-          error instanceof Error ? error.message : "알 수 없는 오류입니다.",
-      });
-    }
+    const run = runPipelineInternal(jobId).finally(() => {
+      inflightPipelines.delete(jobId);
+    });
+    inflightPipelines.set(jobId, run);
+    return run;
   },
 
   /** entry 필드 부분 수정 — rawText/aiText 편집 등 공용 진입점 */

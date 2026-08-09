@@ -1,4 +1,25 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import type { DraftProvider } from "../draftProvider";
+
+// runPipeline의 동시 호출 가드를 검증하려면 provider.generate가 즉시 resolve되지 않아야
+// 두 호출이 실제로 "겹치는" 시점(첫 호출이 아직 drafting 중)을 안정적으로 만들 수 있음.
+vi.mock("../draftProvider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../draftProvider")>();
+  const realMock = actual.createMockDraftProvider();
+  const delayedProvider: DraftProvider = {
+    generate: (input) =>
+      new Promise((resolve) => {
+        setTimeout(() => {
+          realMock.generate(input).then(resolve);
+        }, 10);
+      }),
+  };
+  return {
+    ...actual,
+    getActiveDraftProvider: () => delayedProvider,
+  };
+});
+
 import { subjectDetailJobStore } from "../subjectDetailJobStore";
 import { appNoticeStore } from "../appNoticeStore";
 import type { IngestFragment } from "../subjectDetailTypes";
@@ -57,6 +78,26 @@ describe("subjectDetailJobStore", () => {
     expect(subjectDetailJobStore.getById(jobId)?.notifiedAt).toBe(
       firstNotifiedAt,
     );
+  });
+
+  it("overlapping runPipeline calls on the same job notify only once", async () => {
+    const jobId = subjectDetailJobStore.createFromFragments(fragments);
+
+    // 첫 호출이 아직 drafting 중(await 전)일 때 바로 두 번째 호출 — in-flight Promise 공유 검증
+    const first = subjectDetailJobStore.runPipeline(jobId);
+    expect(subjectDetailJobStore.getById(jobId)?.status).toBe("drafting");
+    const second = subjectDetailJobStore.runPipeline(jobId);
+
+    await Promise.all([first, second]);
+
+    const job = subjectDetailJobStore.getById(jobId);
+    expect(job?.status).toBe("ready");
+    expect(job?.entries.every((e) => e.aiText.length > 0)).toBe(true);
+
+    const notices = appNoticeStore
+      .list()
+      .filter((n) => n.href === `/records/subject-details?job=${jobId}`);
+    expect(notices).toHaveLength(1);
   });
 
   it("updateEntry and setReviewStatus patch the matching entry only", () => {
