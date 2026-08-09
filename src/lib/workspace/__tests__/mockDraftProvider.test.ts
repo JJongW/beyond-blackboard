@@ -76,28 +76,56 @@ describe("getActiveDraftProvider", () => {
 });
 
 describe("resolveDraftProviderMode", () => {
-  const originalEnv = process.env.AI_DRAFT_PROVIDER;
+  const originalServerEnv = process.env.AI_DRAFT_PROVIDER;
+  const originalPublicEnv = process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER;
 
   afterEach(() => {
-    if (originalEnv === undefined) {
+    if (originalServerEnv === undefined) {
       delete process.env.AI_DRAFT_PROVIDER;
     } else {
-      process.env.AI_DRAFT_PROVIDER = originalEnv;
+      process.env.AI_DRAFT_PROVIDER = originalServerEnv;
+    }
+    if (originalPublicEnv === undefined) {
+      delete process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER;
+    } else {
+      process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER = originalPublicEnv;
     }
   });
 
   it("defaults to mock when unset", () => {
     delete process.env.AI_DRAFT_PROVIDER;
+    delete process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER;
     expect(resolveDraftProviderMode()).toBe("mock");
   });
 
   it("falls back to mock for unknown values", () => {
+    delete process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER;
     process.env.AI_DRAFT_PROVIDER = "something-else";
     expect(resolveDraftProviderMode()).toBe("mock");
   });
 
-  it("recognizes the ollama flag", () => {
+  it("recognizes the ollama flag via AI_DRAFT_PROVIDER (server-only contexts)", () => {
+    delete process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER;
     process.env.AI_DRAFT_PROVIDER = "ollama";
+    expect(resolveDraftProviderMode()).toBe("ollama");
+  });
+
+  it("recognizes the ollama flag via NEXT_PUBLIC_AI_DRAFT_PROVIDER (browser)", () => {
+    delete process.env.AI_DRAFT_PROVIDER;
+    process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER = "ollama";
+    expect(resolveDraftProviderMode()).toBe("ollama");
+  });
+
+  it("prefers NEXT_PUBLIC_AI_DRAFT_PROVIDER over AI_DRAFT_PROVIDER when both are set", () => {
+    // 파이프라인은 브라우저에서 실행되므로 클라이언트 번들에 인라인되는
+    // NEXT_PUBLIC_* 쪽이 실제로 유효한 값 — AI_DRAFT_PROVIDER만으로는
+    // 브라우저에서 Ollama가 켜지지 않는다는 리뷰 지적을 회귀 방지로 고정.
+    process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER = "mock";
+    process.env.AI_DRAFT_PROVIDER = "ollama";
+    expect(resolveDraftProviderMode()).toBe("mock");
+
+    process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER = "ollama";
+    process.env.AI_DRAFT_PROVIDER = "mock";
     expect(resolveDraftProviderMode()).toBe("ollama");
   });
 

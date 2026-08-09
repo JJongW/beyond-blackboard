@@ -15,6 +15,7 @@ import Tabs from "@/components/ui/Tabs";
 import AttachmentInput from "@/components/ui/AttachmentInput";
 import Field from "@/components/ui/Field";
 import { subjectDetailJobStore } from "@/lib/workspace/subjectDetailJobStore";
+import { resolveDraftProviderMode } from "@/lib/workspace/draftProvider";
 import { studentStore } from "@/lib/workspace/studentStore";
 import { useSingletonStore } from "@/lib/workspace/useSingletonStore";
 import { parseCsv, parseTxtFile } from "@/lib/workspace/ingestParser";
@@ -278,6 +279,7 @@ export default function SubjectDetailsHub() {
     job != null && entryIndex >= 0 && entryIndex < job.entries.length - 1;
   const banner = job ? STATUS_BANNER[job.status] : null;
   const isReviewable = job?.status === "ready" || job?.status === "failed";
+  const isOllamaMode = resolveDraftProviderMode() === "ollama";
 
   return (
     <MainLayout>
@@ -305,6 +307,14 @@ export default function SubjectDetailsHub() {
             ) : undefined
           }
         />
+
+        {isOllamaMode && (
+          <Callout tone="neutral" icon="help" className="mb-6">
+            Ollama 초안 생성 모드가 켜져 있습니다. 로컬에서 Ollama 서버가 실행
+            중이어야 AI 초안이 생성되며, 연결에 실패하면 원본 텍스트로 자동
+            대체됩니다.
+          </Callout>
+        )}
 
         <Card className="mb-6">
           <Field

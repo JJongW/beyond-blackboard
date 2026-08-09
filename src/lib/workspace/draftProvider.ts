@@ -56,11 +56,19 @@ let ollamaProviderSingleton: DraftProvider | null = null;
 
 export type DraftProviderMode = "mock" | "ollama";
 
-/** `AI_DRAFT_PROVIDER` (서버) 또는 `NEXT_PUBLIC_AI_DRAFT_PROVIDER` (클라이언트) 플래그를 읽음. 미설정/알 수 없는 값은 mock */
+/**
+ * `NEXT_PUBLIC_AI_DRAFT_PROVIDER` (클라이언트/브라우저) 또는 `AI_DRAFT_PROVIDER` (서버·테스트
+ * 전용 컨텍스트) 플래그를 읽음. 미설정/알 수 없는 값은 mock.
+ *
+ * 파이프라인은 브라우저에서 실행되므로 `NEXT_PUBLIC_*`가 아닌 `AI_DRAFT_PROVIDER`만 설정하면
+ * Next.js가 클라이언트 번들에 이를 인라인하지 않아 실제로는 활성화되지 않는다. 따라서
+ * `NEXT_PUBLIC_AI_DRAFT_PROVIDER`를 우선 확인하고, 그것이 없을 때만 `AI_DRAFT_PROVIDER`(서버
+ * 전용 코드나 Vitest처럼 process.env를 직접 읽는 컨텍스트)로 폴백한다.
+ */
 export function resolveDraftProviderMode(): DraftProviderMode {
   const raw =
-    process.env.AI_DRAFT_PROVIDER ??
     process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER ??
+    process.env.AI_DRAFT_PROVIDER ??
     "mock";
   return raw.trim().toLowerCase() === "ollama" ? "ollama" : "mock";
 }

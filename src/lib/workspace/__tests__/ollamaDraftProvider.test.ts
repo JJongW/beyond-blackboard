@@ -90,20 +90,42 @@ describe("createOllamaDraftProvider", () => {
   });
 });
 
-describe("getActiveDraftProvider with AI_DRAFT_PROVIDER=ollama", () => {
-  const originalEnv = process.env.AI_DRAFT_PROVIDER;
+describe("getActiveDraftProvider with the ollama flag", () => {
+  const originalServerEnv = process.env.AI_DRAFT_PROVIDER;
+  const originalPublicEnv = process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER;
   const originalFetch = global.fetch;
 
   afterEach(() => {
-    if (originalEnv === undefined) {
+    if (originalServerEnv === undefined) {
       delete process.env.AI_DRAFT_PROVIDER;
     } else {
-      process.env.AI_DRAFT_PROVIDER = originalEnv;
+      process.env.AI_DRAFT_PROVIDER = originalServerEnv;
+    }
+    if (originalPublicEnv === undefined) {
+      delete process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER;
+    } else {
+      process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER = originalPublicEnv;
     }
     global.fetch = originalFetch;
   });
 
-  it("returns an Ollama-backed provider that calls fetch", async () => {
+  it("returns an Ollama-backed provider when NEXT_PUBLIC_AI_DRAFT_PROVIDER=ollama (browser path)", async () => {
+    delete process.env.AI_DRAFT_PROVIDER;
+    process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER = "ollama";
+    const fetchMock = mockFetchOnce({
+      ok: true,
+      json: async () => ({ aiText: "ollama 결과" }),
+    });
+
+    const provider = getActiveDraftProvider();
+    const result = await provider.generate({ rawText: "원본" });
+
+    expect(result).toBe("ollama 결과");
+    expect(fetchMock).toHaveBeenCalled();
+  });
+
+  it("returns an Ollama-backed provider when only AI_DRAFT_PROVIDER=ollama is set (server-only contexts)", async () => {
+    delete process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER;
     process.env.AI_DRAFT_PROVIDER = "ollama";
     const fetchMock = mockFetchOnce({
       ok: true,
