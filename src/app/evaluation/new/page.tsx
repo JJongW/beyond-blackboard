@@ -11,16 +11,37 @@ import ActionButton from "@/components/ui/ActionButton";
 import Callout from "@/components/ui/Callout";
 import Snackbar from "@/components/ui/Snackbar";
 import Card from "@/components/ui/Card";
+import Field from "@/components/ui/Field";
 import ContextualFloatingButton from "@/components/ui/ContextualFloatingButton";
+import { evaluationJobStore } from "@/lib/workspace/evaluationJobStore";
 
 /**
- * 답안지 업로드 — AttachmentInput / Slider 미리보기
+ * 답안지 업로드 — 로컬 채점 작업 생성
  */
 export default function EvaluationNewPage() {
   const router = useRouter();
+  const [title, setTitle] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [strictness, setStrictness] = useState(60);
+  const [error, setError] = useState<string | null>(null);
   const [snack, setSnack] = useState(false);
+
+  const onUpload = () => {
+    const result = evaluationJobStore.create({
+      title,
+      fileNames: files.map((f) => f.name),
+      strictness,
+    });
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setError(null);
+    setSnack(true);
+    window.setTimeout(() => {
+      router.push(`/evaluation/${result.job.id}`);
+    }, 400);
+  };
 
   return (
     <MainLayout>
@@ -41,18 +62,32 @@ export default function EvaluationNewPage() {
         />
 
         <Callout tone="informative" icon="grading" className="mb-6">
-          업로드·자동 채점은 곧 연결됩니다. 지금은 첨부 UI 미리보기입니다.
+          파일은 서버로 올라가지 않습니다. 파일명만 로컬 채점 작업에 기록됩니다.
         </Callout>
 
         <Card className="mb-6 space-y-6">
+          <Field label="채점 제목 (선택)" htmlFor="eval-title">
+            <input
+              id="eval-title"
+              className="cp-input w-full"
+              placeholder="예: 3단원 서술형"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </Field>
           <AttachmentInput files={files} onChange={setFiles} />
           <Slider
-            label="채점 엄격도 (미리보기)"
+            label="채점 엄격도"
             value={strictness}
             onChange={setStrictness}
             min={0}
             max={100}
           />
+          {error && (
+            <p className="text-sm text-[var(--cp-danger)]" role="alert">
+              {error}
+            </p>
+          )}
           <div className="flex flex-wrap justify-end gap-2">
             <ActionButton
               variant="neutralWeak"
@@ -63,7 +98,7 @@ export default function EvaluationNewPage() {
             <ActionButton
               variant="brandSolid"
               disabled={files.length === 0}
-              onClick={() => setSnack(true)}
+              onClick={onUpload}
             >
               업로드 시작
             </ActionButton>
@@ -74,18 +109,18 @@ export default function EvaluationNewPage() {
           <ContentPlaceholder
             tall
             title="미리보기 영역"
-            description="파일을 첨부하면 여기에 미리보기가 표시됩니다."
+            description="파일을 첨부하면 여기에 목록이 표시됩니다."
           />
         ) : (
           <ContentPlaceholder
             title={`${files.length}개 파일 선택됨`}
-            description="실제 미리보기는 백엔드 연동 후 제공됩니다."
+            description={files.map((f) => f.name).join(", ")}
           />
         )}
 
         <Snackbar
           open={snack}
-          message="업로드 미리보기 — 서버 연동 전입니다."
+          message="채점 작업을 만들었습니다."
           tone="positive"
           onClose={() => setSnack(false)}
         />

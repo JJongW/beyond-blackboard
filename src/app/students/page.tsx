@@ -10,7 +10,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import Avatar from "@/components/ui/Avatar";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import List, { ListItem } from "@/components/ui/List";
-import { AlertDialog } from "@/components/ui/Dialog";
+import Dialog from "@/components/ui/Dialog";
 import ReactionButton from "@/components/ui/ReactionButton";
 import TagGroup from "@/components/ui/TagGroup";
 import FloatingActionButton from "@/components/ui/FloatingActionButton";
@@ -19,72 +19,59 @@ import Card from "@/components/ui/Card";
 import InputButton from "@/components/ui/InputButton";
 import MenuSheet from "@/components/ui/MenuSheet";
 import ImageFrame from "@/components/ui/ImageFrame";
-import { Student } from "@/types";
+import Field from "@/components/ui/Field";
+import ActionButton from "@/components/ui/ActionButton";
+import Snackbar from "@/components/ui/Snackbar";
+import Select from "@/components/ui/Select";
 import { studentAvatarSrc } from "@/constants/designTokens";
+import { studentStore } from "@/lib/workspace/studentStore";
+import { gradeStore } from "@/lib/workspace/gradeStore";
+import { useSingletonStore } from "@/lib/workspace/useSingletonStore";
 
 /**
- * 학생 관리 — SegmentedControl / Avatar / List / AlertDialog 연결
+ * 학생 관리 — studentStore + 등록 Dialog
  */
 export default function StudentsPage() {
+  const { students } = useSingletonStore(studentStore);
   const [viewMode, setViewMode] = useState<"card" | "list">("card");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGrade, setSelectedGrade] = useState<string>("전체");
   const [showAddModal, setShowAddModal] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [snack, setSnack] = useState(false);
 
-  const [students, setStudents] = useState<Student[]>([
-    {
-      id: "1",
-      name: "홍길동",
-      studentNumber: "202401001",
-      class: "1-2",
-      grade: 1,
-      gender: "male",
-      tags: ["도움필요", "수학우수"],
-      isFavorite: true,
-      avatar: studentAvatarSrc("male"),
-    },
-    {
-      id: "2",
-      name: "김철수",
-      studentNumber: "202402001",
-      class: "2-1",
-      grade: 2,
-      gender: "male",
-      tags: ["우수", "리더십"],
-      isFavorite: false,
-      avatar: studentAvatarSrc("male"),
-    },
-    {
-      id: "3",
-      name: "이영희",
-      studentNumber: "202401002",
-      class: "1-2",
-      grade: 1,
-      gender: "female",
-      tags: ["성실", "예술"],
-      isFavorite: true,
-      avatar: studentAvatarSrc("female"),
-    },
-    {
-      id: "4",
-      name: "박민수",
-      studentNumber: "202403001",
-      class: "3-1",
-      grade: 3,
-      gender: "male",
-      tags: ["체육우수"],
-      isFavorite: false,
-      avatar: studentAvatarSrc("male"),
-    },
-  ]);
+  const [name, setName] = useState("");
+  const [studentNumber, setStudentNumber] = useState("");
+  const [grade, setGrade] = useState("3");
+  const [className, setClassName] = useState("3-1");
+  const [gender, setGender] = useState<"male" | "female">("male");
+  const [formError, setFormError] = useState<string | null>(null);
 
-  const toggleFavorite = (studentId: string) => {
-    setStudents((prev) =>
-      prev.map((s) =>
-        s.id === studentId ? { ...s, isFavorite: !s.isFavorite } : s,
-      ),
-    );
+  const openAdd = () => {
+    setName("");
+    setStudentNumber("");
+    setGrade("3");
+    setClassName("3-1");
+    setGender("male");
+    setFormError(null);
+    setShowAddModal(true);
+  };
+
+  const onAdd = () => {
+    const result = studentStore.add({
+      name,
+      studentNumber,
+      grade: Number(grade),
+      className,
+      gender,
+    });
+    if (!result.ok) {
+      setFormError(result.error);
+      return;
+    }
+    gradeStore.syncStudents();
+    setShowAddModal(false);
+    setSnack(true);
   };
 
   const filteredStudents = students.filter((student) => {
@@ -128,6 +115,7 @@ export default function StudentsPage() {
           title="필터"
         >
           학년 Chip으로 좁히고, 카드/리스트는 Segmented Control로 전환합니다.
+          등록한 학생은 이 브라우저에 보관됩니다.
         </Callout>
 
         <div className="cp-card mb-6 !p-4">
@@ -179,6 +167,8 @@ export default function StudentsPage() {
             icon="students"
             title="검색 결과가 없습니다"
             description="다른 검색어나 학년 필터를 시도해 보세요."
+            actionLabel="학생 등록"
+            onAction={openAdd}
           />
         ) : viewMode === "card" ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -197,7 +187,7 @@ export default function StudentsPage() {
                   </div>
                   <ReactionButton
                     pressed={!!student.isFavorite}
-                    onChange={() => toggleFavorite(student.id)}
+                    onChange={() => studentStore.toggleFavorite(student.id)}
                   />
                 </div>
                 <h2 className="cp-h3">{student.name}</h2>
@@ -232,7 +222,7 @@ export default function StudentsPage() {
                     />
                     <ReactionButton
                       pressed={!!student.isFavorite}
-                      onChange={() => toggleFavorite(student.id)}
+                      onChange={() => studentStore.toggleFavorite(student.id)}
                       size={20}
                     />
                   </div>
@@ -242,10 +232,7 @@ export default function StudentsPage() {
           </List>
         )}
 
-        <FloatingActionButton
-          label="학생 등록"
-          onClick={() => setShowAddModal(true)}
-        />
+        <FloatingActionButton label="학생 등록" onClick={openAdd} />
 
         <MenuSheet
           open={sheetOpen}
@@ -255,8 +242,8 @@ export default function StudentsPage() {
             {
               id: "add",
               label: "학생 등록",
-              icon: <CrepassIcon name="add" size={18} />,
-              onSelect: () => setShowAddModal(true),
+              icon: <CrepassIcon name="add" sizeToken="inline" />,
+              onSelect: openAdd,
             },
             {
               id: "card",
@@ -271,14 +258,98 @@ export default function StudentsPage() {
           ]}
         />
 
-        <AlertDialog
+        <Dialog
           open={showAddModal}
           onClose={() => setShowAddModal(false)}
           title="새 학생 등록"
-          description="학생 등록은 곧 연결됩니다. 지금은 미리보기입니다."
-          confirmLabel="확인"
-          cancelLabel="닫기"
-          onConfirm={() => setShowAddModal(false)}
+          actions={
+            <>
+              <ActionButton
+                variant="ghost"
+                onClick={() => setShowAddModal(false)}
+              >
+                취소
+              </ActionButton>
+              <ActionButton variant="brandSolid" onClick={onAdd}>
+                등록
+              </ActionButton>
+            </>
+          }
+        >
+          <div className="space-y-4">
+            <Field
+              label="이름"
+              htmlFor="stu-name"
+              error={formError?.includes("이름") ? formError : undefined}
+            >
+              <input
+                id="stu-name"
+                className="cp-input w-full"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (formError) setFormError(null);
+                }}
+              />
+            </Field>
+            <Field
+              label="학번"
+              htmlFor="stu-number"
+              error={
+                formError && !formError.includes("이름") ? formError : undefined
+              }
+            >
+              <input
+                id="stu-number"
+                className="cp-input w-full"
+                value={studentNumber}
+                onChange={(e) => {
+                  setStudentNumber(e.target.value);
+                  if (formError) setFormError(null);
+                }}
+              />
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="학년" htmlFor="stu-grade">
+                <Select
+                  id="stu-grade"
+                  value={grade}
+                  onChange={setGrade}
+                  options={["1", "2", "3", "4", "5", "6"].map((g) => ({
+                    value: g,
+                    label: `${g}학년`,
+                  }))}
+                />
+              </Field>
+              <Field label="반" htmlFor="stu-class">
+                <input
+                  id="stu-class"
+                  className="cp-input w-full"
+                  value={className}
+                  onChange={(e) => setClassName(e.target.value)}
+                  placeholder="3-1"
+                />
+              </Field>
+            </div>
+            <Field label="구분" htmlFor="stu-gender">
+              <Select
+                id="stu-gender"
+                value={gender}
+                onChange={setGender}
+                options={[
+                  { value: "male", label: "남" },
+                  { value: "female", label: "여" },
+                ]}
+              />
+            </Field>
+          </div>
+        </Dialog>
+
+        <Snackbar
+          open={snack}
+          message="학생을 등록했습니다."
+          tone="positive"
+          onClose={() => setSnack(false)}
         />
       </main>
     </MainLayout>

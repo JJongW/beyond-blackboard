@@ -125,6 +125,7 @@ export const NAVIGATION_ITEMS = [
   { title: "학생", href: "/students" },
   { title: "출결", href: "/attendance" },
   { title: "채점", href: "/evaluation" },
+  { title: "성적", href: "/grades" },
   { title: "생기부", href: "/records" },
 ];
 
