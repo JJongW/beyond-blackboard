@@ -15,11 +15,26 @@ export function createMockDraftProvider(): DraftProvider {
 
 let mockProviderSingleton: DraftProvider | null = null;
 
+export type DraftProviderMode = "mock" | "ollama";
+
+/** `AI_DRAFT_PROVIDER` (서버) 또는 `NEXT_PUBLIC_AI_DRAFT_PROVIDER` (클라이언트) 플래그를 읽음. 미설정/알 수 없는 값은 mock */
+export function resolveDraftProviderMode(): DraftProviderMode {
+  const raw =
+    process.env.AI_DRAFT_PROVIDER ??
+    process.env.NEXT_PUBLIC_AI_DRAFT_PROVIDER ??
+    "mock";
+  return raw.trim().toLowerCase() === "ollama" ? "ollama" : "mock";
+}
+
 /**
  * 현재 활성 DraftProvider.
- * Phase 2에서 `AI_DRAFT_PROVIDER=ollama` 등으로 분기 예정 — 이번 태스크는 mock 고정.
+ * 플래그가 `ollama`여도 Phase 2 OllamaDraftProvider는 아직 미구현이라 mock으로 폴백.
  */
 export function getActiveDraftProvider(): DraftProvider {
+  const mode = resolveDraftProviderMode();
+  // Phase 2 자리: mode === "ollama"일 때 createOllamaDraftProvider()로 교체 예정.
+  void mode;
+
   if (!mockProviderSingleton) {
     mockProviderSingleton = createMockDraftProvider();
   }

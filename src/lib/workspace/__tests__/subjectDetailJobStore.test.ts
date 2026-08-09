@@ -39,6 +39,26 @@ describe("subjectDetailJobStore", () => {
     expect(notice?.title).toBe("학생들의 세부특기사항 작성이 완료되었습니다");
   });
 
+  it("runPipeline no-ops on an already-ready job (no duplicate notice)", async () => {
+    const jobId = subjectDetailJobStore.createFromFragments(fragments);
+    await subjectDetailJobStore.runPipeline(jobId);
+
+    const noticesForJob = () =>
+      appNoticeStore
+        .list()
+        .filter((n) => n.href === `/records/subject-details?job=${jobId}`);
+
+    expect(noticesForJob()).toHaveLength(1);
+    const firstNotifiedAt = subjectDetailJobStore.getById(jobId)?.notifiedAt;
+
+    await subjectDetailJobStore.runPipeline(jobId);
+
+    expect(noticesForJob()).toHaveLength(1);
+    expect(subjectDetailJobStore.getById(jobId)?.notifiedAt).toBe(
+      firstNotifiedAt,
+    );
+  });
+
   it("updateEntry and setReviewStatus patch the matching entry only", () => {
     const jobId = subjectDetailJobStore.createFromFragments(fragments);
     const job = subjectDetailJobStore.getById(jobId);

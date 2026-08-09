@@ -1,8 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect } from "vitest";
 import {
   createMockDraftProvider,
   getActiveDraftProvider,
+  resolveDraftProviderMode,
 } from "../draftProvider";
+import { MOCK_DRAFT_MAX_LENGTH } from "../subjectDetailPrompt";
 
 describe("createMockDraftProvider", () => {
   const provider = createMockDraftProvider();
@@ -35,10 +37,72 @@ describe("createMockDraftProvider", () => {
     const b = await provider.generate({ rawText: "수학을 좋아함" });
     expect(a).toBe(b);
   });
+
+  it("applies a soft max length cap for very long input", async () => {
+    const longText = "수학 시간에 적극적으로 참여함 ".repeat(40);
+    const result = await provider.generate({ rawText: longText });
+    expect(result.length).toBeLessThanOrEqual(MOCK_DRAFT_MAX_LENGTH + 1);
+    expect(result).toMatch(/[.!?]$/);
+  });
+
+  it("prefers truncating at the last sentence boundary within the cap", async () => {
+    const longText = "학급 활동에 성실히 참여함. ".repeat(60);
+    const result = await provider.generate({ rawText: longText });
+    expect(result.length).toBeLessThanOrEqual(MOCK_DRAFT_MAX_LENGTH + 1);
+    expect(result.endsWith("참여함.")).toBe(true);
+  });
+
+  it("falls back to a word boundary when no sentence punctuation is present", async () => {
+    const longText = Array.from({ length: 300 }, (_, i) => `키워드${i}`).join(
+      " ",
+    );
+    const result = await provider.generate({ rawText: longText });
+    const withoutTrailingPeriod = result.endsWith(".")
+      ? result.slice(0, -1)
+      : result;
+    const tokens = withoutTrailingPeriod.split(" ");
+    const lastToken = tokens[tokens.length - 1];
+    expect(lastToken).toMatch(/^키워드\d+$/);
+    expect(result.length).toBeLessThanOrEqual(MOCK_DRAFT_MAX_LENGTH + 1);
+  });
 });
 
 describe("getActiveDraftProvider", () => {
   it("defaults to a working mock provider", async () => {
+    const provider = getActiveDraftProvider();
+    const result = await provider.generate({ rawText: "발표를 잘함" });
+    expect(result.length).toBeGreaterThan(0);
+  });
+});
+
+describe("resolveDraftProviderMode", () => {
+  const originalEnv = process.env.AI_DRAFT_PROVIDER;
+
+  afterEach(() => {
+    if (originalEnv === undefined) {
+      delete process.env.AI_DRAFT_PROVIDER;
+    } else {
+      process.env.AI_DRAFT_PROVIDER = originalEnv;
+    }
+  });
+
+  it("defaults to mock when unset", () => {
+    delete process.env.AI_DRAFT_PROVIDER;
+    expect(resolveDraftProviderMode()).toBe("mock");
+  });
+
+  it("falls back to mock for unknown values", () => {
+    process.env.AI_DRAFT_PROVIDER = "something-else";
+    expect(resolveDraftProviderMode()).toBe("mock");
+  });
+
+  it("recognizes the ollama flag (not yet wired to an Ollama provider)", () => {
+    process.env.AI_DRAFT_PROVIDER = "ollama";
+    expect(resolveDraftProviderMode()).toBe("ollama");
+  });
+
+  it("getActiveDraftProvider still returns a working mock regardless of the flag", async () => {
+    process.env.AI_DRAFT_PROVIDER = "ollama";
     const provider = getActiveDraftProvider();
     const result = await provider.generate({ rawText: "발표를 잘함" });
     expect(result.length).toBeGreaterThan(0);

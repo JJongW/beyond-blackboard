@@ -102,8 +102,12 @@ export const subjectDetailJobStore = {
   /**
    * `drafting` → 각 entry에 대해 DraftProvider.generate 실행 → `ready` → notifyHub.
    * provider 실패 시 job을 `failed`로 표시 (Phase 2 Ollama 장애 대비 동일 경로).
+   * 이미 `ready`인 job은 재호출해도 no-op — 중복 알림 방지.
    */
   async runPipeline(jobId: string): Promise<void> {
+    const existing = store.getState().jobs.find((j) => j.id === jobId);
+    if (existing?.status === "ready") return;
+
     patchJob(jobId, { status: "drafting" });
     const provider = getActiveDraftProvider();
 

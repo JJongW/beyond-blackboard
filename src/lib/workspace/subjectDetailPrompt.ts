@@ -26,7 +26,37 @@ export function ensureSentenceEnding(text: string): string {
   return `${trimmed}.`;
 }
 
-/** Mock 초안 변환: 공백 정규화 + 문장 부호 보정 (결정적 — 같은 입력엔 항상 같은 출력) */
+/** 세부특기사항 한 항목의 소프트 상한 (글자 수). NEIS 특기사항 칸의 통상적인 분량 감안 */
+export const MOCK_DRAFT_MAX_LENGTH = 500;
+
+/**
+ * 상한을 넘는 텍스트를 문장 경계(마침표/느낌표/물음표) 우선, 없으면 단어(공백) 경계에서 자름.
+ * 두 경계 모두 없으면 상한에서 그대로 자름 (입력이 공백 없는 긴 문자열인 극단적 경우).
+ */
+export function truncateSoft(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+
+  const slice = text.slice(0, maxLength);
+  const lastSentenceEnd = Math.max(
+    slice.lastIndexOf("."),
+    slice.lastIndexOf("!"),
+    slice.lastIndexOf("?"),
+  );
+  if (lastSentenceEnd > 0) {
+    return slice.slice(0, lastSentenceEnd + 1);
+  }
+
+  const lastSpace = slice.lastIndexOf(" ");
+  if (lastSpace > 0) {
+    return slice.slice(0, lastSpace);
+  }
+
+  return slice;
+}
+
+/** Mock 초안 변환: 공백 정규화 → 소프트 길이 제한 → 문장 부호 보정 (결정적 — 같은 입력엔 항상 같은 출력) */
 export function buildMockDraft(rawText: string): string {
-  return ensureSentenceEnding(normalizeWhitespace(rawText));
+  const normalized = normalizeWhitespace(rawText);
+  const truncated = truncateSoft(normalized, MOCK_DRAFT_MAX_LENGTH);
+  return ensureSentenceEnding(truncated);
 }
