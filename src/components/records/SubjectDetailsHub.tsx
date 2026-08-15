@@ -125,6 +125,16 @@ export default function SubjectDetailsHub() {
     }
   }, [searchParams]);
 
+  // 존재하지 않는 ?job= (또는 삭제된 id) → 최근 job으로 복구
+  useEffect(() => {
+    if (!selectedJobId) return;
+    if (jobs.some((j) => j.id === selectedJobId)) return;
+    // hydrate 전 빈 목록이면 대기
+    if (jobs.length === 0) return;
+    setSelectedJobId(jobs[0].id);
+    setSnack("요청한 작업을 찾지 못해 최근 작업으로 이동했습니다.");
+  }, [jobs, selectedJobId]);
+
   // job 미선택 시 가장 최근 job(목록 맨 앞)을 기본 선택
   useEffect(() => {
     if (selectedJobId) return;
@@ -340,10 +350,14 @@ export default function SubjectDetailsHub() {
             { label: "과목별 세부특기사항" },
           ]}
           actions={
-            jobs.length > 1 ? (
+            jobs.length > 0 ? (
               <Select
                 aria-label="작업 선택"
-                value={selectedJobId ?? ""}
+                value={
+                  selectedJobId && jobs.some((j) => j.id === selectedJobId)
+                    ? selectedJobId
+                    : (jobs[0]?.id ?? "")
+                }
                 onChange={(value) => setSelectedJobId(value)}
                 options={jobs.map((j) => ({
                   value: j.id,
@@ -364,35 +378,29 @@ export default function SubjectDetailsHub() {
         )}
 
         <Card className="mb-6">
-          <Field
-            label="파일 업로드"
-            htmlFor="subject-detail-upload"
-            hint="CSV(studentName, studentNumber?, rawText) 또는 학생별 .txt 여러 개"
-            error={uploadError ?? undefined}
-          >
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-              <div className="min-w-0 flex-1">
-                <AttachmentInput
-                  id="subject-detail-upload"
-                  label=""
-                  hint="CSV 1개 또는 .txt 여러 개"
-                  accept=".csv,text/csv,.txt"
-                  multiple
-                  files={uploadFiles}
-                  onChange={(files) => {
-                    void onFilesSelected(files);
-                  }}
-                />
-              </div>
-              <ActionButton
-                variant="neutralOutline"
-                type="button"
-                onClick={() => void onLoadSample()}
-              >
-                샘플 불러오기
-              </ActionButton>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="min-w-0 flex-1">
+              <AttachmentInput
+                id="subject-detail-upload"
+                label="파일 업로드"
+                hint="CSV(studentName, studentNumber?, rawText) 또는 학생별 .txt 여러 개"
+                error={uploadError ?? undefined}
+                accept=".csv,text/csv,.txt"
+                multiple
+                files={uploadFiles}
+                onChange={(files) => {
+                  void onFilesSelected(files);
+                }}
+              />
             </div>
-          </Field>
+            <ActionButton
+              variant="neutralOutline"
+              type="button"
+              onClick={() => void onLoadSample()}
+            >
+              샘플 불러오기
+            </ActionButton>
+          </div>
         </Card>
 
         {banner && (
