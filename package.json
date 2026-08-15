@@ -30,7 +30,8 @@
     "clean": "rm -rf .next dist",
     "analyze": "ANALYZE=true npm run build",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "train:smoke": "tsx src/lib/subjectDetailTrain/runSmoke.ts"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.7",
@@ -51,6 +52,7 @@
     "eslint-config-next": "15.4.6",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.23.12",
     "typescript": "^5",
     "vitest": "^3.2.7"
   }
