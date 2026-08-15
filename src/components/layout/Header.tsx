@@ -3,8 +3,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { NAVIGATION_ITEMS, NOTICES } from "@/constants";
+import { appNoticeStore } from "@/lib/workspace/appNoticeStore";
+import { useSingletonStore } from "@/lib/workspace/useSingletonStore";
 import { BRAND } from "@/constants/designTokens";
 import { NAV_ICON_BY_HREF } from "@/constants/designSystemNav";
 import { User } from "@/types";
@@ -28,6 +30,9 @@ interface HeaderProps {
  */
 const Header: React.FC<HeaderProps> = ({ user }) => {
   const pathname = usePathname();
+  const router = useRouter();
+  const { notices: appNotices } = useSingletonStore(appNoticeStore);
+  const noticeItems = [...appNotices, ...NOTICES];
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -125,7 +130,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
               }}
             >
               <CrepassIcon name="bell" sizeToken="xl" />
-              <NotificationBadge count={NOTICES.length} />
+              <NotificationBadge count={noticeItems.length} />
             </button>
 
             {isNotifOpen && (
@@ -145,26 +150,43 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
                     <CrepassIcon name="close" sizeToken="inline" />
                   </button>
                 </div>
-                {NOTICES.length === 0 ? (
+                {noticeItems.length === 0 ? (
                   <p className="px-4 py-10 text-center text-sm text-ink-muted">
                     새 알림이 없습니다
                   </p>
                 ) : (
                   <List bordered={false} className="max-h-72 overflow-y-auto">
-                    {NOTICES.slice(0, 5).map((notice) => (
-                      <ListItem
-                        key={notice.id}
-                        title={notice.title}
-                        description={notice.content}
-                        trailing={
-                          notice.isImportant ? (
-                            <Badge tone="critical" size="small">
-                              중요
-                            </Badge>
-                          ) : undefined
-                        }
-                      />
-                    ))}
+                    {noticeItems.slice(0, 5).map((notice) =>
+                      "createdAt" in notice ? (
+                        <ListItem
+                          key={notice.id}
+                          title={notice.title}
+                          description={notice.body}
+                          onClick={
+                            notice.href
+                              ? () => {
+                                  appNoticeStore.markRead(notice.id);
+                                  router.push(notice.href!);
+                                  setIsNotifOpen(false);
+                                }
+                              : undefined
+                          }
+                        />
+                      ) : (
+                        <ListItem
+                          key={notice.id}
+                          title={notice.title}
+                          description={notice.content}
+                          trailing={
+                            notice.isImportant ? (
+                              <Badge tone="critical" size="small">
+                                중요
+                              </Badge>
+                            ) : undefined
+                          }
+                        />
+                      ),
+                    )}
                   </List>
                 )}
               </div>

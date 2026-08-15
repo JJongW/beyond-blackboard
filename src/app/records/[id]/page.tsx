@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import MainLayout from "@/components/layout/MainLayout";
 import PageHeader from "@/components/ui/PageHeader";
@@ -13,13 +13,28 @@ import EmptyState from "@/components/ui/EmptyState";
 import { getRecordTemplate } from "@/lib/workspace/recordTemplates";
 import { recordDraftStore } from "@/lib/workspace/recordDraftStore";
 import { useSingletonStore } from "@/lib/workspace/useSingletonStore";
+import SubjectDetailsHub from "@/components/records/SubjectDetailsHub";
 
 /**
  * 생기부 템플릿 작성 — 로컬 draft store 데모
+ * `subject-details`는 배치 검토 허브(SubjectDetailsHub)로 대체
  */
 export default function RecordDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
+
+  if (id === "subject-details") {
+    return (
+      <Suspense fallback={null}>
+        <SubjectDetailsHub />
+      </Suspense>
+    );
+  }
+
+  return <SingleRecordDraftPage id={id} />;
+}
+
+function SingleRecordDraftPage({ id }: { id: string }) {
   const template = getRecordTemplate(id);
   const state = useSingletonStore(recordDraftStore);
 
