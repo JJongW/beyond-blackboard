@@ -33,6 +33,9 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
   const router = useRouter();
   const { notices: appNotices } = useSingletonStore(appNoticeStore);
   const noticeItems = [...appNotices, ...NOTICES];
+  // 동적 알림은 읽지 않은 것만, 정적 NOTICES는 데모용으로 항상 포함
+  const badgeCount =
+    appNotices.filter((n) => !n.readAt).length + NOTICES.length;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -130,7 +133,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
               }}
             >
               <CrepassIcon name="bell" sizeToken="xl" />
-              <NotificationBadge count={noticeItems.length} />
+              <NotificationBadge count={badgeCount} />
             </button>
 
             {isNotifOpen && (

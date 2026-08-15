@@ -240,6 +240,24 @@ export default function SubjectDetailsHub() {
     markEdited();
   };
 
+  /** 학생 전환 전에 dirty 버퍼를 스토어에 반영 — 미저장 손실 방지 */
+  const flushDraftIfDirty = () => {
+    if (!entry) return;
+    if (!dirtyRaw && !dirtyAi) return;
+    subjectDetailJobStore.updateEntry(entry.id, {
+      rawText: rawDraft,
+      aiText: aiDraft,
+    });
+    setDirtyRaw(false);
+    setDirtyAi(false);
+  };
+
+  const selectEntry = (id: string) => {
+    if (id === selectedEntryId) return;
+    flushDraftIfDirty();
+    setSelectedEntryId(id);
+  };
+
   const onSave = () => {
     if (!entry) return;
     subjectDetailJobStore.updateEntry(entry.id, {
@@ -286,7 +304,7 @@ export default function SubjectDetailsHub() {
     if (!job || !entry) return;
     const idx = job.entries.findIndex((e) => e.id === entry.id);
     const next = job.entries[idx + 1];
-    if (next) setSelectedEntryId(next.id);
+    if (next) selectEntry(next.id);
   };
 
   const onRetryDraft = () => {
@@ -426,7 +444,7 @@ export default function SubjectDetailsHub() {
                       <li key={e.id}>
                         <button
                           type="button"
-                          onClick={() => setSelectedEntryId(e.id)}
+                          onClick={() => selectEntry(e.id)}
                           className={`flex w-full flex-col items-start gap-1.5 px-3 py-2.5 text-left text-sm transition-colors ${
                             selected
                               ? "bg-brand-muted/60"
@@ -544,7 +562,7 @@ export default function SubjectDetailsHub() {
                 label="학생"
                 aria-label="학생 선택"
                 value={entry?.id ?? ""}
-                onChange={(value) => setSelectedEntryId(value)}
+                onChange={(value) => selectEntry(value)}
                 options={job.entries.map((e) => ({
                   value: e.id,
                   label: `${studentLabel(e, students)} · ${REVIEW_BADGE[e.reviewStatus].label}`,

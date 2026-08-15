@@ -32,8 +32,11 @@ export const appNoticeStore = {
   list() {
     return store.getState().notices;
   },
+  /** 동일 id면 맨 앞으로 갱신(upsert) — 재시도 시 벨 중복 방지 */
   add(notice: AddAppNoticeInput) {
-    store.setState((s) => ({ notices: [{ ...notice }, ...s.notices] }));
+    store.setState((s) => ({
+      notices: [{ ...notice }, ...s.notices.filter((n) => n.id !== notice.id)],
+    }));
   },
   markRead(id: string) {
     store.setState((s) => ({
@@ -41,5 +44,9 @@ export const appNoticeStore = {
         n.id === id ? { ...n, readAt: new Date().toISOString() } : n,
       ),
     }));
+  },
+  /** 읽지 않은 동적 알림 수 (배지용) */
+  unreadCount() {
+    return store.getState().notices.filter((n) => !n.readAt).length;
   },
 };
