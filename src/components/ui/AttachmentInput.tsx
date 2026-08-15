@@ -8,6 +8,7 @@ type AttachmentInputProps = {
   id?: string;
   label?: string;
   hint?: string;
+  error?: string;
   accept?: string;
   multiple?: boolean;
   disabled?: boolean;
@@ -23,6 +24,7 @@ export default function AttachmentInput({
   id,
   label = "파일 첨부",
   hint = "이미지 또는 PDF",
+  error,
   accept = "image/*,.pdf",
   multiple = true,
   disabled,
@@ -35,7 +37,13 @@ export default function AttachmentInput({
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <Field label={label} htmlFor={inputId} hint={hint} className={className}>
+    <Field
+      label={label}
+      htmlFor={inputId}
+      hint={hint}
+      error={error}
+      className={className}
+    >
       <input
         ref={inputRef}
         id={inputId}
@@ -47,6 +55,8 @@ export default function AttachmentInput({
         onChange={(e) => {
           const list = Array.from(e.target.files ?? []);
           onChange(list);
+          // 같은 파일 재선택 시 change가 다시 오도록 value 리셋
+          e.target.value = "";
         }}
       />
       <button
