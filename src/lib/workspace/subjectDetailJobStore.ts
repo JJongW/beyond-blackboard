@@ -127,6 +127,7 @@ async function runPipelineInternal(
 export const subjectDetailJobStore = {
   subscribe: store.subscribe,
   getState: store.getState,
+  getServerSnapshot: store.getServerSnapshot,
   list() {
     return store.getState().jobs;
   },

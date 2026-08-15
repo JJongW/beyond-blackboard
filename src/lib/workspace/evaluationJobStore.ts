@@ -30,6 +30,7 @@ function nowISO() {
 export const evaluationJobStore = {
   subscribe: store.subscribe,
   getState: store.getState,
+  getServerSnapshot: store.getServerSnapshot,
   list() {
     return store.getState().jobs;
   },

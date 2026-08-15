@@ -35,6 +35,7 @@ function nowISO() {
 export const recordDraftStore = {
   subscribe: store.subscribe,
   getState: store.getState,
+  getServerSnapshot: store.getServerSnapshot,
   getDraft(templateId: string): RecordDraft | undefined {
     return store.getState().drafts[templateId];
   },

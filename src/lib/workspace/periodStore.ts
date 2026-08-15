@@ -32,6 +32,7 @@ const TIME_RE = /^\d{2}:\d{2}$/;
 export const periodStore = {
   subscribe: store.subscribe,
   getState: store.getState,
+  getServerSnapshot: store.getServerSnapshot,
   list(): ClassPeriod[] {
     return store.getState().periods;
   },

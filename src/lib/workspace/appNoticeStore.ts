@@ -28,6 +28,7 @@ const store = createSingletonStore<AppNoticeState>(
 export const appNoticeStore = {
   subscribe: store.subscribe,
   getState: store.getState,
+  getServerSnapshot: store.getServerSnapshot,
   list() {
     return store.getState().notices;
   },

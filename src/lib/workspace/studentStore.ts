@@ -68,6 +68,7 @@ export type AddStudentInput = {
 export const studentStore = {
   subscribe: store.subscribe,
   getState: store.getState,
+  getServerSnapshot: store.getServerSnapshot,
   list() {
     return store.getState().students;
   },

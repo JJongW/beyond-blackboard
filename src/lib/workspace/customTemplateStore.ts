@@ -39,6 +39,7 @@ export function isDocumentCategory(v: string): v is DocumentCategory {
 export const customTemplateStore = {
   subscribe: store.subscribe,
   getState: store.getState,
+  getServerSnapshot: store.getServerSnapshot,
   list() {
     return store.getState().templates;
   },
