@@ -51,6 +51,7 @@ function nowISO() {
 export const rubricStore = {
   subscribe: store.subscribe,
   getState: store.getState,
+  getServerSnapshot: store.getServerSnapshot,
   save(title: string, criteria: RubricCriterion[]) {
     const t = title.trim();
     if (!t) {

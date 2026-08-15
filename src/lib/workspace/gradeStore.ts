@@ -38,6 +38,7 @@ function nowISO() {
 export const gradeStore = {
   subscribe: store.subscribe,
   getState: store.getState,
+  getServerSnapshot: store.getServerSnapshot,
   /** 학생 추가 후 빠진 행 보충 */
   syncStudents() {
     const students = studentStore.list();
