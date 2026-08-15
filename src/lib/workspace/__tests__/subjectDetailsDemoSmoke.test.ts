@@ -26,6 +26,8 @@ describe("subject details demo smoke (fixture → pipeline)", () => {
     expect(job?.status).toBe("ready");
     expect(job?.entries.length).toBeGreaterThanOrEqual(3);
     expect(job?.entries.every((e) => e.aiText.length > 0)).toBe(true);
+    // 샘플 CSV의 미매칭 행 — 수동 연결 UI 데모용
+    expect(job?.entries.some((e) => e.unmatchedName === "최미매칭")).toBe(true);
 
     const notice = appNoticeStore
       .list()
